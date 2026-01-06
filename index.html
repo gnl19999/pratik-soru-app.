@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Uygulaması - Otomatik Kod Üretici</title>
+    <title>Kelime Uygulaması - Otomatik Güncelleme</title>
     <style>
         /* --- GENEL AYARLAR --- */
         body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #4a6a7a; color: white; display: flex; justify-content: center; user-select: none; }
@@ -51,18 +51,17 @@
         .save-btn { width: 100%; padding: 15px; background-color: #f1c40f; color: #1a1a1a; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.1s; margin-top: 10px; }
         .save-btn:active { transform: scale(0.98); }
         .save-btn.secondary { background-color: #3498db; color: white; }
-        .save-btn.code-btn { background-color: #e74c3c; color: white; margin-top: 5px; }
+        
+        /* ÖZEL İNDİRME BUTONU */
+        .save-btn.download-btn { 
+            background: linear-gradient(135deg, #2ecc71, #27ae60); 
+            color: white; 
+            border: 2px solid #2ecc71;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+        }
+        .save-btn.download-btn:hover { background: linear-gradient(135deg, #27ae60, #2ecc71); }
 
         .helper-text { font-size: 12px; color: #bdc3c7; margin-top: 5px; line-height: 1.4; }
-        
-        /* Kod Çıktı Alanı Stili */
-        #live-code-output { 
-            background-color: #1a1a1a; color: #a2c638; 
-            font-family: 'Courier New', Courier, monospace; 
-            font-size: 12px; height: 150px; 
-            white-space: pre; overflow-x: auto; 
-            border: 1px solid #a2c638;
-        }
 
         /* --- TEST EKRANI --- */
         #quiz-screen { display: none; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; background-color: #1a1a1a; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 20; }
@@ -151,13 +150,10 @@
 
 <script>
     /* ================================================================
-       VERİTABANI (HARDCODED + LOCAL STORAGE)
+       VERİTABANI - BAŞLANGIÇ VERİLERİ
        ================================================================ */
     
-    // Tarayıcı güvenlik nedeniyle dosyanın kendisini değiştiremez.
-    // Ancak sen eklediğin kelimeleri aşağıdaki "defaultData" değişkenine yapıştırırsan
-    // kelimeler sonsuza kadar kalıcı olur.
-    
+    // !!! DİKKAT: Bu kısım "Uygulamayı İndir" dendiğinde otomatik güncellenir.
     const defaultData = { "YDS": {}, "H": {}, "B2": {}, "B1": {}, "C": {} };
 
     // --- C Seviye 1 ---
@@ -217,7 +213,7 @@
     ];
 
     let vocabularyData = {};
-    const STORAGE_KEY = 'myVocabApp_Data_v9'; // Versiyon güncellemesi
+    const STORAGE_KEY = 'myVocabApp_Data_v10'; // Versiyon güncellemesi
 
     function loadData() {
         const stored = localStorage.getItem(STORAGE_KEY);
@@ -237,8 +233,6 @@
 
     function saveData() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabularyData));
-        // Kaydettikten sonra otomatik kod çıktısını güncelle
-        if(document.getElementById('live-code-output')) updateLiveCode();
     }
 
     loadData();
@@ -342,19 +336,16 @@
                 <button class="save-btn secondary" onclick="saveBulkWords()">Toplu Yükle</button>
             </div>
 
-            <div class="add-word-container" style="border-color: #e74c3c;">
-                <div class="add-section-title">4. Otomatik Kod Çıktısı (Ölümsüz Yap)</div>
+            <div class="add-word-container" style="border-color: #2ecc71;">
+                <div class="add-section-title">4. Uygulamayı Kalıcı Olarak Kaydet</div>
                 <p class="helper-text">
-                    Eklediğin kelimeler aşağıya otomatik yansır. İşin bitince bu kodu kopyala ve HTML dosyasındaki 
-                    <b>const defaultData = ...</b> kısmı ile değiştir. Böylece kelimeler asla silinmez.
+                    Eklediğin kelimelerin sonsuza kadar kodun içinde kalmasını ister misin? 
+                    Bu butona bas, sana <b>güncellenmiş uygulamanı</b> indireyim. 
+                    Eski dosyanı silip yeni inen dosyayı kullan.
                 </p>
-                <textarea id="live-code-output" class="form-textarea" readonly></textarea>
-                <button class="save-btn code-btn" onclick="copyCode()">Kopyala</button>
+                <button class="save-btn download-btn" onclick="downloadUpdatedHTML()">🚀 Tüm Verilerle Yeni Uygulamayı İndir</button>
             </div>
         `;
-        
-        // Form açıldığında kodu hemen doldur
-        updateLiveCode();
     }
 
     function generateLevelOptions() {
@@ -363,20 +354,37 @@
         return opts;
     }
 
-    // --- ANLIK KOD GÜNCELLEME FONKSİYONU ---
-    function updateLiveCode() {
-        const textArea = document.getElementById('live-code-output');
-        if (textArea) {
-            const code = "const defaultData = " + JSON.stringify(vocabularyData, null, 4) + ";";
-            textArea.value = code;
-        }
-    }
+    // --- ÖZEL İNDİRME FONKSİYONU ---
+    function downloadUpdatedHTML() {
+        // 1. Mevcut tüm verileri al (Senin eklediklerin dahil)
+        const currentDataJSON = JSON.stringify(vocabularyData, null, 4);
 
-    function copyCode() {
-        const copyText = document.getElementById("live-code-output");
-        copyText.select();
-        document.execCommand("copy");
-        alert("Kod kopyalandı! Şimdi HTML dosyanı aç ve 'const defaultData' kısmını bununla değiştir.");
+        // 2. Sayfanın şu anki kaynak kodunu al
+        let htmlContent = document.documentElement.outerHTML;
+
+        // 3. Kodun içindeki 'const defaultData = ...' kısmını bul ve GÜNCEL veriyle değiştir.
+        // Bu işlem regex ile yapılır.
+        // Hedef: const defaultData = { ... }; kısmını bulmak.
+        const regex = /const defaultData = \{[\s\S]*?\};/;
+        
+        // Yeni kod satırı
+        const replacement = `const defaultData = ${currentDataJSON};`;
+
+        // Değişikliği yap
+        const newHtmlContent = htmlContent.replace(regex, replacement);
+
+        // 4. Dosya oluştur ve indir
+        const blob = new Blob([newHtmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'kelime_uygulamasi_guncel.html'; // Yeni dosya adı
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert("Yeni uygulama indirildi! \nLütfen eski dosyanı sil ve artık 'kelime_uygulamasi_guncel.html' dosyasını kullan.");
     }
 
     function saveSingleWord() {
@@ -401,36 +409,19 @@
         if(!text) { alert("Lütfen liste yapıştırın."); return; }
 
         let addedCount = 0;
-        
-        // JSON kontrolü
-        if (text.trim().startsWith('[')) {
-            try {
-                const jsonData = JSON.parse(text);
-                if (Array.isArray(jsonData)) {
-                    jsonData.forEach(item => {
-                        if (item.en && item.tr) {
-                            addToDatabase(cat, lvl, item.en, item.tr);
-                            addedCount++;
-                        }
-                    });
+        const lines = text.split('\n');
+        lines.forEach(line => {
+            let delimiter = line.includes(':') ? ':' : (line.includes('=') ? '=' : '\t');
+            const parts = line.split(delimiter);
+            if (parts.length >= 2) {
+                const en = parts[0].trim();
+                const tr = parts.slice(1).join(delimiter).trim();
+                if (en && tr) {
+                    addToDatabase(cat, lvl, en, tr);
+                    addedCount++;
                 }
-            } catch(e) { console.log(e); }
-        } else {
-            // Normal metin kontrolü
-            const lines = text.split('\n');
-            lines.forEach(line => {
-                let delimiter = line.includes(':') ? ':' : (line.includes('=') ? '=' : '\t');
-                const parts = line.split(delimiter);
-                if (parts.length >= 2) {
-                    const en = parts[0].trim();
-                    const tr = parts.slice(1).join(delimiter).trim();
-                    if (en && tr) {
-                        addToDatabase(cat, lvl, en, tr);
-                        addedCount++;
-                    }
-                }
-            });
-        }
+            }
+        });
 
         if (addedCount > 0) {
             alert(`${addedCount} kelime eklendi.`);
@@ -444,7 +435,7 @@
         if (!vocabularyData[cat]) vocabularyData[cat] = {};
         if (!vocabularyData[cat][lvl]) vocabularyData[cat][lvl] = [];
         vocabularyData[cat][lvl].push({ en: en, tr: tr });
-        saveData(); // Bu fonksiyon içinde updateLiveCode() çağrılır
+        saveData(); 
     }
 
     // --- TEST (QUIZ) ---
