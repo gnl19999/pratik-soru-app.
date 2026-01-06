@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Uygulaması - C Seviyesi</title>
+    <title>Kelime Uygulaması - C Seviye 3-4 Eklendi</title>
     <style>
         /* --- GENEL AYARLAR --- */
         body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #4a6a7a; color: white; display: flex; justify-content: center; user-select: none; }
@@ -135,90 +135,113 @@
 
 <script>
     /* ================================================================
-       VERİTABANI VE LOCAL STORAGE (KAYIT SİSTEMİ)
+       VERİTABANI
        ================================================================ */
     
-    // Varsayılan boş yapı (İlk açılışta kullanılır)
+    // Varsayılan veriler
     const defaultData = {
         "YDS": {}, "H": {}, "B2": {}, "B1": {}, "C": {}
     };
 
-    // --- C / Seviye 1'e Eklenen Kelimeler ---
+    // --- C Seviyesi 1. Kısım ---
     defaultData["C"][1] = [
-        { "en": "Abandon", "tr": "Terk etmek, vazgeçmek" },
-        { "en": "Abolish", "tr": "Yürürlükten kaldırmak" },
-        { "en": "Accomplish", "tr": "Başarmak, tamamlamak" },
-        { "en": "Accumulate", "tr": "Biriktirmek, çoğalmak" },
-        { "en": "Acquire", "tr": "Edinmek, kazanmak" },
-        { "en": "Adopt", "tr": "Evlat edinmek / Benimsemek" },
-        { "en": "Advocate", "tr": "Savunmak, desteklemek" },
-        { "en": "Alleviate", "tr": "Hafifletmek, yatıştırmak" },
-        { "en": "Alter", "tr": "Değiştirmek" },
-        { "en": "Ambiguity", "tr": "Belirsizlik" },
-        { "en": "Assess", "tr": "Değerlendirmek" },
-        { "en": "Benefit", "tr": "Faydalanmak, yarar sağlamak" },
-        { "en": "Boost", "tr": "Artırmak, yükseltmek" },
-        { "en": "Coincide", "tr": "Rastlamak, aynı zamana denk gelmek" },
-        { "en": "Compensate (for)", "tr": "Telafi etmek" },
-        { "en": "Comprise", "tr": "-den oluşmak, kapsamak" },
-        { "en": "Conceal", "tr": "Gizlemek, saklamak" },
-        { "en": "Conduct", "tr": "Yürütmek (deney, anket vb.)" },
-        { "en": "Confine", "tr": "Sınırlandırmak, hapsetmek" },
-        { "en": "Cope with", "tr": "Başa çıkmak, üstesinden gelmek" }
+        { "en": "Abandon", "tr": "Terk etmek, vazgeçmek" }, { "en": "Abolish", "tr": "Yürürlükten kaldırmak" },
+        { "en": "Accomplish", "tr": "Başarmak, tamamlamak" }, { "en": "Accumulate", "tr": "Biriktirmek, çoğalmak" },
+        { "en": "Acquire", "tr": "Edinmek, kazanmak" }, { "en": "Adopt", "tr": "Evlat edinmek / Benimsemek" },
+        { "en": "Advocate", "tr": "Savunmak, desteklemek" }, { "en": "Alleviate", "tr": "Hafifletmek, yatıştırmak" },
+        { "en": "Alter", "tr": "Değiştirmek" }, { "en": "Ambiguity", "tr": "Belirsizlik" },
+        { "en": "Assess", "tr": "Değerlendirmek" }, { "en": "Benefit", "tr": "Faydalanmak" },
+        { "en": "Boost", "tr": "Artırmak, yükseltmek" }, { "en": "Coincide", "tr": "Rastlamak" },
+        { "en": "Compensate (for)", "tr": "Telafi etmek" }, { "en": "Comprise", "tr": "-den oluşmak" },
+        { "en": "Conceal", "tr": "Gizlemek, saklamak" }, { "en": "Conduct", "tr": "Yürütmek" },
+        { "en": "Confine", "tr": "Sınırlandırmak" }, { "en": "Cope with", "tr": "Başa çıkmak" }
+    ];
+
+    // --- C Seviyesi 2. Kısım ---
+    defaultData["C"][2] = [
+        { "en": "Debate", "tr": "Tartışmak" }, { "en": "Decade", "tr": "On yıl" },
+        { "en": "Decay", "tr": "Çürümek" }, { "en": "Deceive", "tr": "Aldatmak" },
+        { "en": "Declare", "tr": "İlan etmek" }, { "en": "Decline", "tr": "Reddetmek / Azalmak" },
+        { "en": "Dedicate", "tr": "Adamak" }, { "en": "Deduce", "tr": "Sonuç çıkarmak" },
+        { "en": "Defect", "tr": "Kusur" }, { "en": "Defend", "tr": "Savunmak" },
+        { "en": "Defer", "tr": "Ertelemek" }, { "en": "Deficiency", "tr": "Yetersizlik" },
+        { "en": "Deficit", "tr": "Açık (bütçe)" }, { "en": "Define", "tr": "Tanımlamak" },
+        { "en": "Definite", "tr": "Kesin" }, { "en": "Delay", "tr": "Geciktirmek" },
+        { "en": "Delicate", "tr": "Hassas" }, { "en": "Demonstrate", "tr": "Göstermek" },
+        { "en": "Denial", "tr": "İnkar" }, { "en": "Denounce", "tr": "Kınamak" }
+    ];
+
+    // --- C Seviyesi 3. Kısım ---
+    defaultData["C"][3] = [
+        { "en": "Derive", "tr": "Türetmek" }, { "en": "Detect", "tr": "Tespit etmek" },
+        { "en": "Deter", "tr": "Caydırmak" }, { "en": "Deviate", "tr": "Sapmak" },
+        { "en": "Devise", "tr": "Tasarlamak, icat etmek" }, { "en": "Differentiate", "tr": "Ayırt etmek" },
+        { "en": "Diminish", "tr": "Azalmak" }, { "en": "Dispose", "tr": "Elden çıkarmak" },
+        { "en": "Distinct", "tr": "Belirgin, farklı" }, { "en": "Distort", "tr": "Çarpıtmak" },
+        { "en": "Diverse", "tr": "Çeşitli" }, { "en": "Dominate", "tr": "Hakim olmak" },
+        { "en": "Draft", "tr": "Taslak" }, { "en": "Dramatic", "tr": "Çarpıcı, önemli" },
+        { "en": "Duration", "tr": "Süre" }, { "en": "Dynamic", "tr": "Dinamik" },
+        { "en": "Eliminate", "tr": "Elemek, yok etmek" }, { "en": "Emerge", "tr": "Ortaya çıkmak" },
+        { "en": "Emphasize", "tr": "Vurgulamak" }, { "en": "Empirical", "tr": "Deneysel" }
+    ];
+
+    // --- C Seviyesi 4. Kısım ---
+    defaultData["C"][4] = [
+        { "en": "Enable", "tr": "Olanak sağlamak" }, { "en": "Encounter", "tr": "Karşılaşmak" },
+        { "en": "Enhance", "tr": "Geliştirmek" }, { "en": "Enormous", "tr": "Kocaman" },
+        { "en": "Ensure", "tr": "Garantiye almak" }, { "en": "Entail", "tr": "Gerektirmek" },
+        { "en": "Entity", "tr": "Varlık" }, { "en": "Equivalent", "tr": "Eşdeğer" },
+        { "en": "Era", "tr": "Çağ" }, { "en": "Erode", "tr": "Aşınmak" },
+        { "en": "Establish", "tr": "Kurmak" }, { "en": "Estate", "tr": "Mülk" },
+        { "en": "Estimate", "tr": "Tahmin etmek" }, { "en": "Ethical", "tr": "Etik" },
+        { "en": "Evaluate", "tr": "Değerlendirmek" }, { "en": "Eventual", "tr": "Nihai" },
+        { "en": "Evident", "tr": "Aşikar, belirgin" }, { "en": "Evolve", "tr": "Evrim geçirmek" },
+        { "en": "Exceed", "tr": "Aşmak" }, { "en": "Exclude", "tr": "Hariç tutmak" }
     ];
 
     let vocabularyData = {};
     
-    // Veri Anahtarı (Değişikliklerin görünmesi için güncellendi)
-    const STORAGE_KEY = 'myVocabApp_Data_v4';
+    // Veri Anahtarı: Yeni verilerin yüklenmesi için v6 yapıldı
+    const STORAGE_KEY = 'myVocabApp_Data_v6';
 
-    // 1. Veriyi Yükle
     function loadData() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             vocabularyData = JSON.parse(stored);
-            
-            // Eğer kaydedilmiş veri varsa ama C seviye 1 boşsa veya eski veri varsa, günceliyle birleştir
-            if (!vocabularyData["C"][1] || vocabularyData["C"][1].length === 0) {
-                 vocabularyData["C"][1] = defaultData["C"][1];
+            // Eksik verileri tamamla
+            for(let i=1; i<=4; i++) {
+                if(!vocabularyData["C"][i] || vocabularyData["C"][i].length === 0) {
+                    vocabularyData["C"][i] = defaultData["C"][i];
+                }
             }
         } else {
-            vocabularyData = JSON.parse(JSON.stringify(defaultData)); // Derin kopya
+            vocabularyData = JSON.parse(JSON.stringify(defaultData)); 
             saveData();
         }
     }
 
-    // 2. Veriyi Kaydet
     function saveData() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabularyData));
     }
 
-    // Uygulama başlarken veriyi çek
     loadData();
 
-
-    /* ================================================================
-       UYGULAMA MANTIĞI
-       ================================================================ */
+    // --- UYGULAMA MANTIĞI ---
 
     const TOTAL_LEVELS = 20;
-    let activeCategory = 'C'; // Başlangıçta C sekmesi açık olsun
+    let activeCategory = 'C'; 
     let currentQuestions = [];
     let currentStep = 0;
     let correctCount = 0;
 
     window.onload = function() {
-        // İlk açılışta C sekmesini yükle
         switchTab('C', document.querySelector('.tabs .tab.active')); 
     };
 
     function switchTab(catName, tabElement) {
-        // Görsel güncelleme
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        // Eğer tabElement null değilse (sayfa ilk yüklenirken bazen manuel çağırıyoruz)
         if(tabElement) tabElement.classList.add('active');
         else {
-             // Eğer element verilmediyse (onload durumunda) text içeriğine göre bul
              const tabs = document.querySelectorAll('.tab');
              tabs.forEach(t => {
                  if((catName === 'ADD' && t.innerText.includes('Ekle')) || t.innerText === catName) {
@@ -237,14 +260,12 @@
         }
     }
 
-    // --- 1. LİSTE GÖRÜNÜMÜ ---
     function renderLevelList(catName) {
         const container = document.getElementById('content-container');
         container.innerHTML = "";
         const icons = ["🛡️", "✍️", "🔍", "💭", "📚", "👑", "🚀", "💎", "🧩", "🔥"];
 
         for (let i = 1; i <= TOTAL_LEVELS; i++) {
-            // Veri kontrolü ve başlatma
             if (!vocabularyData[catName]) vocabularyData[catName] = {};
             if (!vocabularyData[catName][i]) vocabularyData[catName][i] = [];
 
@@ -265,7 +286,6 @@
         }
     }
 
-    // --- 2. KELİME EKLEME FORMU ---
     function renderAddWordForm() {
         const container = document.getElementById('content-container');
         container.innerHTML = `
@@ -319,24 +339,17 @@
             return;
         }
 
-        // Nesne yapısını kontrol et
         if (!vocabularyData[cat]) vocabularyData[cat] = {};
         if (!vocabularyData[cat][lvl]) vocabularyData[cat][lvl] = [];
 
-        // Ekle
         vocabularyData[cat][lvl].push({ en: en, tr: tr });
-
-        // KAYDET (Local Storage)
         saveData();
 
         alert(`"${en}" kelimesi ${cat} kategorisi ${lvl}. seviyeye başarıyla eklendi!`);
-        
-        // Formu temizle
         document.getElementById('new-en').value = "";
         document.getElementById('new-tr').value = "";
     }
 
-    // --- 3. TEST (QUIZ) ---
     function startQuiz(levelIndex) {
         if(activeCategory === 'ADD') return;
 
@@ -363,7 +376,6 @@
             let correct = word.tr;
             let distractors = [];
             
-            // Yeterli kelime yoksa sahte şıklar üret (Havuz Mantığı)
             let dummyPool = ["Gitmek", "Gelmek", "Koşmak", "Yüzmek", "Uçmak", "Düşünmek", "Anlamak", "Görmek", "Hissetmek"];
             let pool = [...words.map(w => w.tr), ...dummyPool];
 
@@ -446,7 +458,6 @@
         document.getElementById('result-screen').style.display = 'none';
         document.getElementById('quiz-screen').style.display = 'none';
         document.getElementById('home-screen').style.display = 'flex';
-        // Listeyi güncelle ki yeni eklenenler veya ilerleme görünsün
         renderLevelList(activeCategory);
     }
 </script>
