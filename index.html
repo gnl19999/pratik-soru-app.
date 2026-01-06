@@ -3,183 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Uygulaması - Çoklu Seviye</title>
+    <title>Advanced English C1-C2 (400 Kelime)</title>
     <style>
-        /* --- GENEL AYARLAR --- */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #4a6a7a;
-            color: white;
-            display: flex;
-            justify-content: center;
-            transition: background-color 0.3s;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 500px;
-            min-height: 100vh;
-            position: relative;
-            background-color: #4a6a7a;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- ANASAYFA STİLLERİ --- */
-        #home-screen {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        header.home-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background-color: #4a6a7a;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .settings-icon { font-size: 24px; cursor: pointer; }
-        .app-title { font-size: 22px; font-weight: bold; }
-        .profile-pic {
-            width: 40px; height: 40px;
-            background-color: #f3d290; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 20px;
-        }
-
-        /* Sekmeler */
-        .tabs {
-            display: flex; justify-content: space-around;
-            padding: 10px 0;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-            background-color: #4a6a7a;
-            position: sticky;
-            top: 70px; /* Header yüksekliğine göre ayar */
-            z-index: 10;
-        }
-
-        .tab { 
-            color: #bdc3c7; 
-            font-weight: bold; 
-            padding: 10px 15px; 
-            cursor: pointer; 
-            user-select: none;
-        }
+        /* --- TASARIM AYARLARI (Öncekiyle Aynı) --- */
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #4a6a7a; color: white; display: flex; justify-content: center; user-select: none; }
+        .app-container { width: 100%; max-width: 500px; min-height: 100vh; position: relative; background-color: #4a6a7a; display: flex; flex-direction: column; overflow: hidden; }
         
-        .tab.active { 
-            color: #f1c40f; 
-            border-bottom: 3px solid #f1c40f; 
-        }
-
-        /* Seviye Listesi */
-        .level-list { 
-            padding: 20px; 
-            overflow-y: auto; /* Kaydırma özelliği */
-        }
-
-        .level-card {
-            background-color: #3e5c6a;
-            border: 2px solid #d4a35a;
-            border-radius: 10px;
-            display: flex; align-items: center;
-            padding: 15px; margin-bottom: 15px;
-            cursor: pointer; transition: transform 0.2s, background-color 0.2s;
-        }
-
+        /* Anasayfa */
+        #home-screen { display: flex; flex-direction: column; height: 100%; }
+        header.home-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #4a6a7a; position: sticky; top: 0; z-index: 10; }
+        .settings-icon { font-size: 24px; cursor: pointer; }
+        .app-title { font-size: 20px; font-weight: bold; }
+        .profile-pic { width: 40px; height: 40px; background-color: #f3d290; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; }
+        
+        .tabs { display: flex; justify-content: space-around; padding: 10px 0; border-bottom: 2px solid rgba(255, 255, 255, 0.1); background-color: #4a6a7a; position: sticky; top: 70px; z-index: 10; }
+        .tab { color: #bdc3c7; font-weight: bold; padding: 10px 5px; cursor: pointer; font-size: 14px; }
+        .tab.active { color: #f1c40f; border-bottom: 3px solid #f1c40f; }
+        
+        .level-list { padding: 20px; padding-bottom: 80px; }
+        .level-card { background-color: #3e5c6a; border: 2px solid #d4a35a; border-radius: 10px; display: flex; align-items: center; padding: 15px; margin-bottom: 15px; cursor: pointer; transition: transform 0.2s; }
         .level-card:active { transform: scale(0.98); }
-        .level-card:hover { background-color: #466675; }
+        .level-card.locked { opacity: 0.6; border-color: #7f8c8d; pointer-events: none; filter: grayscale(0.8); }
+        .level-icon { font-size: 24px; margin-right: 15px; width: 30px; text-align: center; }
+        .level-info { flex-grow: 1; font-size: 16px; font-weight: bold; }
+        .level-progress { color: #bdc3c7; font-size: 12px; }
 
-        /* Kilitli Seviye Görünümü */
-        .level-card.locked {
-            opacity: 0.6;
-            border-color: #7f8c8d;
-            cursor: not-allowed;
-        }
-
-        .level-icon { font-size: 30px; margin-right: 20px; width: 40px; text-align: center; }
-        .level-info { flex-grow: 1; font-size: 18px; font-weight: bold; }
-        .level-progress { color: #bdc3c7; font-size: 14px; }
-
-        /* --- TEST EKRANI STİLLERİ --- */
-        #quiz-screen {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-            background-color: #1a1a1a;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            max-width: 500px;
-            margin: 0 auto;
-            z-index: 20;
-        }
-
-        .quiz-header {
-            display: flex; justify-content: space-between;
-            align-items: center; margin-bottom: 20px;
-        }
-
+        /* Test Ekranı */
+        #quiz-screen { display: none; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; background-color: #1a1a1a; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 20; }
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .close-btn { font-size: 24px; cursor: pointer; color: #bdc3c7; }
-        .quiz-title { font-size: 18px; font-weight: bold; }
-        .power-icon { color: #3498db; font-size: 20px; }
-
-        .progress-container {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 40px;
-        }
-        .progress-bar {
-            flex-grow: 1; height: 8px;
-            background-color: #333; border-radius: 4px; overflow: hidden;
-        }
-        #progress-fill {
-            width: 0%; height: 100%;
-            background-color: #3498db; transition: width 0.3s;
-        }
+        .quiz-title { font-size: 16px; font-weight: bold; color: #bdc3c7; }
+        .progress-container { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
+        .progress-bar { flex-grow: 1; height: 6px; background-color: #333; border-radius: 3px; overflow: hidden; }
+        #progress-fill { width: 0%; height: 100%; background-color: #3498db; transition: width 0.3s; }
         .progress-text { color: #3498db; font-size: 14px; }
+        .quiz-content { flex-grow: 1; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .word-to-solve { font-size: 32px; font-weight: 800; margin-bottom: 30px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .options { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { background-color: #262626; border: 2px solid #262626; color: #bdc3c7; padding: 15px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: left; }
+        .option-btn.correct { background-color: #2ecc71; border-color: #27ae60; color: white; }
+        .option-btn.wrong { background-color: #e74c3c; border-color: #c0392b; color: white; }
 
-        .quiz-content {
-            flex-grow: 1; text-align: center;
-            display: flex; flex-direction: column; align-items: center;
-        }
-
-        .audio-icon { font-size: 40px; color: #f1c40f; margin-bottom: 20px; cursor: pointer; }
-        .word-to-solve { font-size: 48px; font-weight: 800; margin-bottom: 40px; }
-
-        .options { width: 100%; display: flex; flex-direction: column; gap: 15px; }
-
-        .option-btn {
-            background-color: #262626; border: none; color: #bdc3c7;
-            padding: 20px; border-radius: 30px; font-size: 18px;
-            cursor: pointer; transition: background 0.2s;
-        }
-        .option-btn:hover { background-color: #333; }
-        .option-btn.correct { background-color: #a2c638; color: white; }
-        .option-btn.wrong { background-color: #e74c3c; color: white; }
-
-        #success-overlay {
-            display: none; position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background-color: #a2c638; width: 120px; height: 120px;
-            border-radius: 50%; justify-content: center; align-items: center;
-            font-size: 60px; box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 30;
-        }
+        /* Sonuç Ekranı */
+        #result-screen { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(26, 26, 26, 0.95); z-index: 50; backdrop-filter: blur(5px); }
+        .result-card { background-color: #3e5c6a; width: 80%; padding: 30px; border-radius: 20px; text-align: center; border: 2px solid #d4a35a; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .score-circle { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#f1c40f 0% 0%, #333 0% 100%); margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; position: relative; }
+        .score-circle::before { content: ""; position: absolute; width: 80px; height: 80px; background-color: #3e5c6a; border-radius: 50%; }
+        .score-text { position: relative; z-index: 2; }
+        .result-title { font-size: 24px; margin-bottom: 10px; font-weight: bold; }
+        .result-msg { font-size: 16px; color: #bdc3c7; margin-bottom: 30px; }
+        .home-btn { background-color: #f1c40f; color: #1a1a1a; border: none; padding: 15px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+        .home-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-
     <div id="home-screen">
         <header class="home-header">
             <div class="settings-icon">⚙️</div>
-            <div class="app-title" id="app-header-title">C - Kelimeler</div>
+            <div class="app-title" id="app-header-title">C - İngilizce</div>
             <div class="profile-pic">👨🏻‍💼</div>
         </header>
 
@@ -192,122 +75,244 @@
             <div class="tab" onclick="switchTab('A1', this)">A1</div>
         </div>
 
-        <div class="level-list" id="level-container">
-            </div>
+        <div class="level-list" id="level-container"></div>
     </div>
 
     <div id="quiz-screen">
         <header class="quiz-header">
-            <div class="close-btn" onclick="closeQuiz()">✕</div>
-            <div class="quiz-title">En Çok Kullanılan Fiiller</div>
-            <div class="power-icon">⚡+</div>
+            <div class="close-btn" onclick="quitQuiz()">✕</div>
+            <div class="quiz-title">Test</div>
+            <div style="width: 24px;"></div>
         </header>
-
         <div class="progress-container">
             <div class="progress-bar"><div id="progress-fill"></div></div>
-            <div class="progress-text" id="progress-text">1/10</div>
+            <div class="progress-text" id="progress-text">1/20</div>
         </div>
-
         <div class="quiz-content">
-            <div class="audio-icon">🔊</div>
+            <div style="font-size: 40px; margin-bottom: 10px;">🔊</div>
             <div class="word-to-solve" id="target-word">...</div>
             <div class="options" id="options-container"></div>
         </div>
-        
-        <div id="success-overlay">✔️</div>
     </div>
 
+    <div id="result-screen">
+        <div class="result-card">
+            <div class="result-title">Seviye Bitti!</div>
+            <div class="score-circle" id="score-circle">
+                <span class="score-text" id="final-score">0/20</span>
+            </div>
+            <div class="result-msg" id="result-msg">Sonuç</div>
+            <button class="home-btn" onclick="closeResultScreen()">Devam Et</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    // --- KONFİGÜRASYON ---
-    const totalLevels = 20; // Her sekmede kaç seviye olacak
-    const levelIcons = ["🛡️", "✍️", "🔍", "💭", "📚", "👑", "🚀", "🎯", "🧩", "💡"]; // Döngüsel ikonlar
+    // --- 400 KELİMELİK C1-C2 VERİTABANI ---
+    const vocabularyDatabase = [
+        // Level 1
+        {en:"abundant", tr:"bol, bereketli"}, {en:"accumulate", tr:"biriktirmek"}, {en:"accurate", tr:"kesin, doğru"}, {en:"accustomed", tr:"alışkın"}, {en:"acquire", tr:"elde etmek"},
+        {en:"adamant", tr:"kararlı, inatçı"}, {en:"adequate", tr:"yeterli"}, {en:"adjacent", tr:"bitişik"}, {en:"adjust", tr:"ayarlamak"}, {en:"advocate", tr:"savunmak"},
+        {en:"adverse", tr:"olumsuz, ters"}, {en:"aggregate", tr:"toplam, bir araya getirmek"}, {en:"allocate", tr:"tahsis etmek"}, {en:"alter", tr:"değiştirmek"}, {en:"alternative", tr:"alternatif"},
+        {en:"ambiguous", tr:"belirsiz, muğlak"}, {en:"amend", tr:"değişiklik yapmak (yasa)"}, {en:"analogy", tr:"benzerlik"}, {en:"annual", tr:"yıllık"}, {en:"anticipate", tr:"ummak, beklemek"},
+        // Level 2
+        {en:"apparent", tr:"açık, bariz"}, {en:"append", tr:"eklemek"}, {en:"appreciate", tr:"takdir etmek"}, {en:"approach", tr:"yaklaşım"}, {en:"appropriate", tr:"uygun"},
+        {en:"approximate", tr:"yaklaşık"}, {en:"arbitrary", tr:"keyfi, rastgele"}, {en:"aspect", tr:"yön, açı"}, {en:"assemble", tr:"monte etmek, toplanmak"}, {en:"assess", tr:"değerlendirmek"},
+        {en:"assign", tr:"atamak"}, {en:"assist", tr:"yardım etmek"}, {en:"assume", tr:"varsaymak"}, {en:"assure", tr:"garanti etmek"}, {en:"attach", tr:"eklemek, bağlamak"},
+        {en:"attain", tr:"elde etmek, ulaşmak"}, {en:"attitude", tr:"tutum"}, {en:"attribute", tr:"atfetmek, özellik"}, {en:"augment", tr:"artırmak, çoğaltmak"}, {en:"author", tr:"yazar"},
+        // Level 3
+        {en:"authority", tr:"yetki, otorite"}, {en:"automate", tr:"otomatikleştirmek"}, {en:"available", tr:"mevcut"}, {en:"aware", tr:"farkında"}, {en:"behalf", tr:"adına"},
+        {en:"benefit", tr:"fayda"}, {en:"bias", tr:"önyargı"}, {en:"bond", tr:"bağ, bono"}, {en:"brief", tr:"kısa, özet"}, {en:"bulk", tr:"büyük kısım, hacim"},
+        {en:"capable", tr:"yetenekli"}, {en:"capacity", tr:"kapasite"}, {en:"cease", tr:"durdurmak, sona ermek"}, {en:"challenge", tr:"meydan okuma"}, {en:"channel", tr:"kanal"},
+        {en:"chapter", tr:"bölüm"}, {en:"chart", tr:"grafik, çizelge"}, {en:"chemical", tr:"kimyasal"}, {en:"circumstance", tr:"durum, koşul"}, {en:"cite", tr:"alıntı yapmak"},
+        // Level 4
+        {en:"civil", tr:"sivil"}, {en:"clarify", tr:"açıklamak"}, {en:"classic", tr:"klasik"}, {en:"clause", tr:"madde, fıkra"}, {en:"code", tr:"kod, yasa"},
+        {en:"coherent", tr:"tutarlı"}, {en:"coincide", tr:"rastlamak, çakışmak"}, {en:"collapse", tr:"çökmek"}, {en:"colleague", tr:"meslektaş"}, {en:"commence", tr:"başlamak"},
+        {en:"comment", tr:"yorum"}, {en:"commission", tr:"komisyon"}, {en:"commit", tr:"işlemek (suç), adamak"}, {en:"commodity", tr:"ticari mal"}, {en:"communicate", tr:"iletişim kurmak"},
+        {en:"community", tr:"topluluk"}, {en:"compatible", tr:"uyumlu"}, {en:"compensate", tr:"telafi etmek"}, {en:"compile", tr:"derlemek"}, {en:"complement", tr:"tamamlamak"},
+        // Level 5
+        {en:"complex", tr:"karmaşık"}, {en:"component", tr:"bileşen"}, {en:"compound", tr:"bileşik"}, {en:"comprehensive", tr:"kapsamlı"}, {en:"comprise", tr:"oluşmak, içermek"},
+        {en:"compute", tr:"hesaplamak"}, {en:"conceive", tr:"tasarlamak, algılamak"}, {en:"concentrate", tr:"odaklanmak"}, {en:"concept", tr:"kavram"}, {en:"conclude", tr:"sonuçlandırmak"},
+        {en:"concurrent", tr:"eşzamanlı"}, {en:"conduct", tr:"yürütmek, davranış"}, {en:"confer", tr:"görüşmek, danışmak"}, {en:"confine", tr:"sınırlamak"}, {en:"confirm", tr:"onaylamak"},
+        {en:"conflict", tr:"çatışma"}, {en:"conform", tr:"uymak"}, {en:"consent", tr:"rıza göstermek"}, {en:"consequent", tr:"sonuç olarak"}, {en:"considerable", tr:"önemli, hatırı sayılır"},
+        // Level 6
+        {en:"consist", tr:"-den oluşmak"}, {en:"constant", tr:"sabit, sürekli"}, {en:"constitute", tr:"oluşturmak"}, {en:"constrain", tr:"kısıtlamak"}, {en:"construct", tr:"inşa etmek"},
+        {en:"consult", tr:"danışmak"}, {en:"consume", tr:"tüketmek"}, {en:"contact", tr:"temas"}, {en:"contemporary", tr:"çağdaş"}, {en:"context", tr:"bağlam"},
+        {en:"contract", tr:"sözleşme"}, {en:"contradict", tr:"çelişmek"}, {en:"contrary", tr:"aksi, zıt"}, {en:"contrast", tr:"karşıtlık"}, {en:"contribute", tr:"katkıda bulunmak"},
+        {en:"controversy", tr:"tartışma"}, {en:"convene", tr:"toplanmak"}, {en:"converse", tr:"konuşmak, zıt"}, {en:"convert", tr:"dönüştürmek"}, {en:"convince", tr:"ikna etmek"},
+        // Level 7
+        {en:"cooperate", tr:"işbirliği yapmak"}, {en:"coordinate", tr:"koordine etmek"}, {en:"core", tr:"çekirdek, öz"}, {en:"corporate", tr:"kurumsal"}, {en:"correspond", tr:"yazışmak, uymak"},
+        {en:"couple", tr:"çift"}, {en:"create", tr:"yaratmak"}, {en:"credit", tr:"kredi, itibar"}, {en:"criteria", tr:"kriterler"}, {en:"crucial", tr:"hayati, çok önemli"},
+        {en:"culture", tr:"kültür"}, {en:"currency", tr:"para birimi"}, {en:"cycle", tr:"döngü"}, {en:"data", tr:"veri"}, {en:"debate", tr:"tartışma"},
+        {en:"decade", tr:"onyıl"}, {en:"decline", tr:"reddetmek, azalmak"}, {en:"deduce", tr:"sonuç çıkarmak"}, {en:"define", tr:"tanımlamak"}, {en:"definite", tr:"kesin"},
+        // Level 8
+        {en:"demonstrate", tr:"göstermek, kanıtlamak"}, {en:"denote", tr:"ifade etmek"}, {en:"deny", tr:"inkar etmek"}, {en:"depress", tr:"bunalıma sokmak"}, {en:"derive", tr:"türetmek"},
+        {en:"design", tr:"tasarım"}, {en:"despite", tr:"rağmen"}, {en:"detect", tr:"tespit etmek"}, {en:"deviate", tr:"sapmak"}, {en:"device", tr:"cihaz"},
+        {en:"devote", tr:"adamak"}, {en:"differentiate", tr:"ayırt etmek"}, {en:"dimension", tr:"boyut"}, {en:"diminish", tr:"azalmak"}, {en:"discrete", tr:"ayrık, farklı"},
+        {en:"discriminate", tr:"ayrımcılık yapmak"}, {en:"displace", tr:"yerinden etmek"}, {en:"display", tr:"sergilemek"}, {en:"dispose", tr:"elden çıkarmak"}, {en:"distinct", tr:"belirgin, farklı"},
+        // Level 9
+        {en:"distort", tr:"çarpıtmak"}, {en:"distribute", tr:"dağıtmak"}, {en:"diverse", tr:"çeşitli"}, {en:"document", tr:"belge"}, {en:"domain", tr:"alan, etki alanı"},
+        {en:"domestic", tr:"yerli, evcil"}, {en:"dominate", tr:"hakim olmak"}, {en:"draft", tr:"taslak"}, {en:"drama", tr:"drama"}, {en:"duration", tr:"süre"},
+        {en:"dynamic", tr:"dinamik"}, {en:"economy", tr:"ekonomi"}, {en:"edit", tr:"düzenlemek"}, {en:"element", tr:"unsur"}, {en:"eliminate", tr:"elemek"},
+        {en:"emerge", tr:"ortaya çıkmak"}, {en:"emphasis", tr:"vurgu"}, {en:"empirical", tr:"deneysel"}, {en:"enable", tr:"olanak sağlamak"}, {en:"encounter", tr:"karşılaşmak"},
+        // Level 10
+        {en:"energy", tr:"enerji"}, {en:"enforce", tr:"uygulamak (yasa)"}, {en:"enhance", tr:"geliştirmek"}, {en:"enormous", tr:"kocaman"}, {en:"ensure", tr:"sağlamak, garantiye almak"},
+        {en:"entity", tr:"varlık"}, {en:"environment", tr:"çevre"}, {en:"equate", tr:"eşitlemek"}, {en:"equip", tr:"donatmak"}, {en:"equivalent", tr:"eşdeğer"},
+        {en:"erode", tr:"aşınmak"}, {en:"error", tr:"hata"}, {en:"establish", tr:"kurmak"}, {en:"estate", tr:"mülk, arazi"}, {en:"estimate", tr:"tahmin etmek"},
+        {en:"ethic", tr:"etik"}, {en:"ethnic", tr:"etnik"}, {en:"evaluate", tr:"değerlendirmek"}, {en:"eventual", tr:"nihai"}, {en:"evident", tr:"belli, aşikar"},
+        // Level 11
+        {en:"evolve", tr:"evrim geçirmek"}, {en:"exceed", tr:"aşmak"}, {en:"exclude", tr:"hariç tutmak"}, {en:"exhibit", tr:"sergilemek"}, {en:"expand", tr:"genişlemek"},
+        {en:"expert", tr:"uzman"}, {en:"explicit", tr:"açık, net"}, {en:"exploit", tr:"sömürmek, faydalanmak"}, {en:"export", tr:"ihracat"}, {en:"expose", tr:"maruz bırakmak"},
+        {en:"external", tr:"harici"}, {en:"extract", tr:"çıkarmak (öz)"}, {en:"facilitate", tr:"kolaylaştırmak"}, {en:"factor", tr:"faktör"}, {en:"feature", tr:"özellik"},
+        {en:"federal", tr:"federal"}, {en:"fee", tr:"ücret"}, {en:"file", tr:"dosya"}, {en:"final", tr:"son"}, {en:"finance", tr:"finans"},
+        // Level 12
+        {en:"finite", tr:"sınırlı"}, {en:"flexible", tr:"esnek"}, {en:"fluctuate", tr:"dalgalanmak"}, {en:"focus", tr:"odak"}, {en:"format", tr:"biçim"},
+        {en:"formula", tr:"formül"}, {en:"forthcoming", tr:"yaklaşan"}, {en:"foundation", tr:"temel, vakıf"}, {en:"found", tr:"kurmak"}, {en:"framework", tr:"çerçeve"},
+        {en:"function", tr:"işlev"}, {en:"fund", tr:"fon"}, {en:"fundamental", tr:"temel, esas"}, {en:"furthermore", tr:"ayrıca"}, {en:"gender", tr:"cinsiyet"},
+        {en:"generate", tr:"üretmek"}, {en:"generation", tr:"nesil"}, {en:"globe", tr:"küre, dünya"}, {en:"goal", tr:"hedef"}, {en:"grade", tr:"derece, not"},
+        // Level 13
+        {en:"grant", tr:"hibe etmek, bağış"}, {en:"guarantee", tr:"garanti"}, {en:"guideline", tr:"kılavuz ilke"}, {en:"hence", tr:"bu nedenle"}, {en:"hierarchy", tr:"hiyerarşi"},
+        {en:"highlight", tr:"vurgulamak"}, {en:"hypothesis", tr:"hipotez"}, {en:"identical", tr:"özdeş"}, {en:"identify", tr:"tanımlamak, kimliğini saptamak"}, {en:"ideology", tr:"ideoloji"},
+        {en:"ignorance", tr:"cehalet"}, {en:"illustrate", tr:"resimlemek, örneklemek"}, {en:"image", tr:"görüntü"}, {en:"immigrate", tr:"göç etmek"}, {en:"impact", tr:"etki"},
+        {en:"implement", tr:"uygulamak"}, {en:"implicate", tr:"bulaştırmak, ima etmek"}, {en:"implicit", tr:"imalı, örtülü"}, {en:"imply", tr:"ima etmek"}, {en:"impose", tr:"dayatmak"},
+        // Level 14
+        {en:"incentive", tr:"teşvik"}, {en:"incidence", tr:"olay, vaka"}, {en:"incline", tr:"eğilimi olmak"}, {en:"income", tr:"gelir"}, {en:"incorporate", tr:"bünyesine katmak"},
+        {en:"index", tr:"endeks"}, {en:"indicate", tr:"belirtmek"}, {en:"individual", tr:"birey"}, {en:"induce", tr:"tetiklemek, ikna etmek"}, {en:"inevitable", tr:"kaçınılmaz"},
+        {en:"infer", tr:"anlam çıkarmak"}, {en:"infrastructure", tr:"altyapı"}, {en:"inherent", tr:"doğasında olan"}, {en:"inhibit", tr:"engellemek"}, {en:"initial", tr:"ilk, başlangıç"},
+        {en:"initiate", tr:"başlatmak"}, {en:"injure", tr:"yaralamak"}, {en:"innovate", tr:"yenilik yapmak"}, {en:"input", tr:"girdi"}, {en:"insert", tr:"yerleştirmek"},
+        // Level 15
+        {en:"insight", tr:"içgörü"}, {en:"inspect", tr:"denetlemek"}, {en:"instance", tr:"örnek"}, {en:"institute", tr:"enstitü"}, {en:"instruct", tr:"talimat vermek"},
+        {en:"integral", tr:"tamamlayıcı, ayrılmaz"}, {en:"integrate", tr:"bütünleştirmek"}, {en:"integrity", tr:"bütünlük, dürüstlük"}, {en:"intelligence", tr:"zeka, istihbarat"}, {en:"intense", tr:"yoğun"},
+        {en:"interact", tr:"etkileşim kurmak"}, {en:"intermediate", tr:"orta seviye"}, {en:"internal", tr:"dahili"}, {en:"interpret", tr:"yorumlamak"}, {en:"interval", tr:"aralık"},
+        {en:"intervene", tr:"müdahale etmek"}, {en:"intrinsic", tr:"içsel, esas"}, {en:"invest", tr:"yatırım yapmak"}, {en:"investigate", tr:"araştırmak"}, {en:"invoke", tr:"çağırmak (yasa vb.)"},
+        // Level 16
+        {en:"involve", tr:"içermek, karışmak"}, {en:"isolate", tr:"izole etmek"}, {en:"issue", tr:"sorun, sayı"}, {en:"item", tr:"öğe"}, {en:"job", tr:"iş"},
+        {en:"journal", tr:"dergi, günlük"}, {en:"justify", tr:"haklı çıkarmak"}, {en:"label", tr:"etiket"}, {en:"labor", tr:"emek"}, {en:"layer", tr:"katman"},
+        {en:"lecture", tr:"ders, konferans"}, {en:"legal", tr:"yasal"}, {en:"legislate", tr:"yasa yapmak"}, {en:"levy", tr:"vergi koymak"}, {en:"liberal", tr:"özgürlükçü"},
+        {en:"license", tr:"lisans"}, {en:"likewise", tr:"aynı şekilde"}, {en:"link", tr:"bağlantı"}, {en:"locate", tr:"yerini belirlemek"}, {en:"logic", tr:"mantık"},
+        // Level 17
+        {en:"maintain", tr:"sürdürmek"}, {en:"major", tr:"ana, büyük"}, {en:"manipulate", tr:"manipüle etmek"}, {en:"manual", tr:"el ile yapılan"}, {en:"margin", tr:"kenar boşluğu, pay"},
+        {en:"mature", tr:"olgun"}, {en:"maximize", tr:"maksimize etmek"}, {en:"mechanism", tr:"mekanizma"}, {en:"media", tr:"medya"}, {en:"mediate", tr:"arabuluculuk yapmak"},
+        {en:"medical", tr:"tıbbi"}, {en:"medium", tr:"orta, araç"}, {en:"mental", tr:"zihinsel"}, {en:"method", tr:"yöntem"}, {en:"migrate", tr:"göçmek"},
+        {en:"military", tr:"askeri"}, {en:"minimal", tr:"asgari"}, {en:"minimize", tr:"minimize etmek"}, {en:"minimum", tr:"minimum"}, {en:"ministry", tr:"bakanlık"},
+        // Level 18
+        {en:"minor", tr:"küçük, önemsiz"}, {en:"mode", tr:"mod, şekil"}, {en:"modify", tr:"değiştirmek"}, {en:"monitor", tr:"izlemek"}, {en:"motive", tr:"dürtü, sebep"},
+        {en:"mutual", tr:"karşılıklı"}, {en:"negate", tr:"olumsuzlamak, çürütmek"}, {en:"network", tr:"ağ"}, {en:"neutral", tr:"tarafsız"}, {en:"nevertheless", tr:"yine de"},
+        {en:"nonetheless", tr:"buna rağmen"}, {en:"norm", tr:"norm, kural"}, {en:"normal", tr:"normal"}, {en:"notion", tr:"kavram, düşünce"}, {en:"notwithstanding", tr:"-e rağmen"},
+        {en:"nuclear", tr:"nükleer"}, {en:"objective", tr:"nesnel, hedef"}, {en:"obtain", tr:"elde etmek"}, {en:"obvious", tr:"apaçık"}, {en:"occupy", tr:"işgal etmek, meşgul etmek"},
+        // Level 19
+        {en:"occur", tr:"meydana gelmek"}, {en:"odd", tr:"tuhaf, tek sayı"}, {en:"offset", tr:"dengelemek"}, {en:"ongoing", tr:"devam eden"}, {en:"option", tr:"seçenek"},
+        {en:"orient", tr:"yönlendirmek"}, {en:"outcome", tr:"sonuç"}, {en:"output", tr:"çıktı"}, {en:"overall", tr:"genel, tüm"}, {en:"overlap", tr:"örtüşmek"},
+        {en:"overseas", tr:"denizaşırı"}, {en:"panel", tr:"panel"}, {en:"paradigm", tr:"paradigma, örnek"}, {en:"paragraph", tr:"paragraf"}, {en:"parallel", tr:"paralel"},
+        {en:"parameter", tr:"parametre"}, {en:"participate", tr:"katılmak"}, {en:"partner", tr:"ortak"}, {en:"passive", tr:"pasif"}, {en:"perceive", tr:"algılamak"},
+        // Level 20
+        {en:"percent", tr:"yüzde"}, {en:"period", tr:"dönem"}, {en:"persist", tr:"ısrar etmek, sürmek"}, {en:"perspective", tr:"bakış açısı"}, {en:"phase", tr:"aşama"},
+        {en:"phenomenon", tr:"olgu"}, {en:"philosophy", tr:"felsefe"}, {en:"physical", tr:"fiziksel"}, {en:"plus", tr:"artı"}, {en:"policy", tr:"politika"},
+        {en:"portion", tr:"porsiyon, kısım"}, {en:"pose", tr:"teşkil etmek, poz"}, {en:"positive", tr:"pozitif"}, {en:"potential", tr:"potansiyel"}, {en:"practitioner", tr:"uygulayıcı, hekim"},
+        {en:"precede", tr:"-den önce gelmek"}, {en:"precise", tr:"kesin, hassas"}, {en:"predict", tr:"tahmin etmek"}, {en:"predominant", tr:"baskın"}, {en:"preliminary", tr:"ön hazırlık"}
+    ];
 
-    // Hangi sekme aktif?
+    // --- DEĞİŞKENLER ---
+    const TOTAL_LEVELS = 20;
+    const QUESTIONS_PER_LEVEL = 20;
+    
+    let currentQuestions = [];
+    let currentStep = 0;
+    let correctCount = 0;
     let activeCategory = 'C';
 
-    // --- ANASAYFA YÖNETİMİ ---
-    
-    // Sayfa Yüklendiğinde
-    window.onload = function() {
-        renderLevels(activeCategory);
-    };
+    // --- BAŞLANGIÇ ---
+    window.onload = function() { renderLevels('C'); };
 
-    // Sekme Değiştirme Fonksiyonu
-    function switchTab(categoryName, element) {
-        // Aktif sınıfını güncelle
+    // --- ANASAYFA ---
+    function switchTab(cat, el) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        element.classList.add('active');
-
-        // Başlığı güncelle
-        activeCategory = categoryName;
-        document.getElementById('app-header-title').innerText = categoryName + " - Kelimeler";
-
-        // Listeyi yeniden çiz
-        renderLevels(categoryName);
+        el.classList.add('active');
+        activeCategory = cat;
+        document.getElementById('app-header-title').innerText = cat + " - İngilizce";
+        renderLevels(cat);
     }
 
-    // Seviye Kartlarını Oluşturma (1'den 20'ye kadar)
-    function renderLevels(category) {
+    function renderLevels(cat) {
         const container = document.getElementById('level-container');
-        container.innerHTML = ""; // Listeyi temizle
+        container.innerHTML = "";
+        const icons = ["🛡️", "✍️", "🔍", "🧠", "📚", "👑", "🚀", "💎", "🧩", "🔥"];
 
-        for (let i = 1; i <= totalLevels; i++) {
-            // İkon seçimi (modüler aritmetik ile döngüsel)
-            const icon = levelIcons[(i - 1) % levelIcons.length];
+        for (let i = 1; i <= TOTAL_LEVELS; i++) {
+            let isLocked = (i > 1); // Test amaçlı sadece 1. seviye açık
+            // Gerçek uygulamada localStorage ile kullanıcının geldiği seviyeyi kaydedebiliriz.
             
-            // Kilit durumu simülasyonu: Sadece 1. seviye açık olsun, diğerleri kilitli
-            // (Gerçek uygulamada veritabanından gelir)
-            const isLocked = i > 1; 
-            const progressText = isLocked ? "(Kilitli)" : "(Başla)";
-            const lockedClass = isLocked ? "locked" : "";
-            const clickEvent = isLocked ? "" : `onclick="openQuiz(${i}, '${category}')"`;
-
-            const cardHtml = `
-                <div class="level-card ${lockedClass}" ${clickEvent}>
-                    <div class="level-icon">${icon}</div>
+            let html = `
+                <div class="level-card ${isLocked ? 'locked' : ''}" onclick="startQuiz(${i})">
+                    <div class="level-icon">${icons[(i-1)%icons.length]}</div>
                     <div class="level-info">${i}. Seviye</div>
-                    <div class="level-progress">${progressText}</div>
+                    <div class="level-progress">${isLocked ? '(Kilitli)' : '(Başla)'}</div>
                 </div>
             `;
-            container.innerHTML += cardHtml;
+            container.innerHTML += html;
         }
     }
 
-    // --- TEST YÖNETİMİ (QUIZ) ---
-
-    // Örnek Kelime Verisi
-    const words = [
-        { eng: "finish", tr: "bitirmek, tamamlamak", options: ["devam etmek", "hissetmek", "sahip olmak", "bitirmek, tamamlamak"] },
-        { eng: "feel", tr: "hissetmek", options: ["hissetmek", "koşmak", "bakmak", "görmek"] },
-        { eng: "have", tr: "sahip olmak", options: ["gitmek", "sahip olmak", "yapmak", "düşünmek"] }
-    ];
-    let currentStep = 0;
-
-    function openQuiz(levelIndex, category) {
-        // Quiz ekranını aç
-        document.getElementById('home-screen').style.display = 'none'; // Anasayfayı gizle
-        document.getElementById('quiz-screen').style.display = 'flex'; // Quizi göster
+    // --- QUIZ MANTIĞI ---
+    function startQuiz(levelIndex) {
+        // 1. O seviyeye ait kelimeleri seç
+        generateLevelQuestions(levelIndex);
         
-        // Başlığı dinamik yapabiliriz
-        document.querySelector('.quiz-title').innerText = `${category} - ${levelIndex}. Seviye Testi`;
-
-        // Testi başlat
+        // 2. Ekranı Aç
+        document.getElementById('home-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'flex';
+        document.querySelector('.quiz-title').innerText = `${activeCategory} - ${levelIndex}. Seviye`;
+        
+        // 3. Sıfırla
         currentStep = 0;
-        loadQuestion();
+        correctCount = 0;
+        loadQuestionUI();
     }
 
-    function closeQuiz() {
-        document.getElementById('quiz-screen').style.display = 'none';
-        document.getElementById('home-screen').style.display = 'flex'; // Flex kullandığımız için 'block' değil 'flex'
+    function generateLevelQuestions(level) {
+        // Seviye 1: 0-20 arası, Seviye 2: 20-40 arası...
+        const startIndex = (level - 1) * QUESTIONS_PER_LEVEL;
+        const endIndex = startIndex + QUESTIONS_PER_LEVEL;
+        
+        // Sadece o seviyenin kelimelerini al
+        const levelWords = vocabularyDatabase.slice(startIndex, endIndex);
+        
+        // Soruları oluştur
+        currentQuestions = levelWords.map(word => {
+            let correct = word.tr;
+            
+            // Yanlış şıkları TÜM havuzdan rastgele seç (daha zorlayıcı olsun)
+            let distractors = [];
+            while(distractors.length < 3) {
+                let randomWord = vocabularyDatabase[Math.floor(Math.random() * vocabularyDatabase.length)];
+                if(randomWord.tr !== correct && !distractors.includes(randomWord.tr)) {
+                    distractors.push(randomWord.tr);
+                }
+            }
+            
+            let options = [...distractors, correct].sort(() => 0.5 - Math.random());
+            
+            return {
+                en: word.en,
+                correct: correct,
+                options: options
+            };
+        });
+
+        // Soruların sırasını da karıştır (İsteğe bağlı, şimdilik sıralı gelsin ki liste sırasını takip edebilsin)
+        // currentQuestions.sort(() => 0.5 - Math.random());
     }
 
-    function loadQuestion() {
-        const data = words[currentStep % words.length]; // Kelimeler bitince başa dönsün diye modül
-        document.getElementById('target-word').innerText = data.eng;
-        document.getElementById('progress-text').innerText = `${currentStep + 1}/10`; // 10 soruluk test simülasyonu
-        document.getElementById('progress-fill').style.width = `${((currentStep + 1) / 10) * 100}%`;
+    function loadQuestionUI() {
+        if (currentStep >= currentQuestions.length) {
+            showResult();
+            return;
+        }
+        const data = currentQuestions[currentStep];
+        
+        document.getElementById('target-word').innerText = data.en;
+        document.getElementById('progress-text').innerText = `${currentStep + 1}/${QUESTIONS_PER_LEVEL}`;
+        document.getElementById('progress-fill').style.width = `${((currentStep + 1) / QUESTIONS_PER_LEVEL) * 100}%`;
 
         const container = document.getElementById('options-container');
         container.innerHTML = '';
@@ -316,36 +321,56 @@
             const btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.innerText = opt;
-            btn.onclick = () => checkAnswer(opt, data.tr, btn);
+            btn.onclick = () => handleAnswer(opt, data.correct, btn);
             container.appendChild(btn);
         });
     }
 
-    function checkAnswer(selected, correct, btn) {
+    function handleAnswer(selected, correct, btn) {
         const allBtns = document.querySelectorAll('.option-btn');
         allBtns.forEach(b => b.disabled = true);
 
         if (selected === correct) {
             btn.classList.add('correct');
-            document.getElementById('success-overlay').style.display = 'flex';
-            
-            setTimeout(() => {
-                document.getElementById('success-overlay').style.display = 'none';
-                currentStep++;
-                if (currentStep < 10) { // 10 soru sınırı
-                    loadQuestion();
-                } else {
-                    alert("Tebrikler! Seviye tamamlandı.");
-                    closeQuiz();
-                }
-            }, 1000);
+            correctCount++;
         } else {
             btn.classList.add('wrong');
-            setTimeout(() => {
-                btn.classList.remove('wrong');
-                allBtns.forEach(b => b.disabled = false);
-            }, 800);
+            allBtns.forEach(b => {
+                if (b.innerText === correct) b.classList.add('correct');
+            });
         }
+
+        setTimeout(() => {
+            currentStep++;
+            loadQuestionUI();
+        }, 1200);
+    }
+
+    function quitQuiz() {
+        if(confirm("Çıkmak istediğine emin misin?")) closeResultScreen();
+    }
+
+    // --- SONUÇ EKRANI ---
+    function showResult() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'flex';
+
+        document.getElementById('final-score').innerText = `${correctCount}/${QUESTIONS_PER_LEVEL}`;
+        let percentage = (correctCount / QUESTIONS_PER_LEVEL) * 100;
+        let color = percentage >= 50 ? '#2ecc71' : '#e74c3c';
+        document.querySelector('.score-circle').style.background = `conic-gradient(${color} 0% ${percentage}%, #333 ${percentage}% 100%)`;
+
+        let msgDiv = document.getElementById('result-msg');
+        if (percentage === 100) msgDiv.innerText = "Mükemmel! 👑";
+        else if (percentage >= 70) msgDiv.innerText = "Süper! 💪";
+        else if (percentage >= 50) msgDiv.innerText = "Güzel. 👍";
+        else msgDiv.innerText = "Tekrar dene. 📚";
+    }
+
+    function closeResultScreen() {
+        document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('home-screen').style.display = 'flex';
     }
 </script>
 
