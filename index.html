@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Uygulaması - Tam Otomatik</title>
+    <title>Kelime Uygulaması - Yedekleme Sistemli</title>
     <style>
         /* --- GENEL AYARLAR --- */
         body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #4a6a7a; color: white; display: flex; justify-content: center; user-select: none; }
@@ -35,13 +35,18 @@
 
         /* FORM */
         .add-word-container { background-color: #3e5c6a; padding: 20px; border-radius: 15px; border: 2px solid #f1c40f; margin-bottom: 20px; }
+        .backup-container { background-color: #2c3e50; padding: 20px; border-radius: 15px; border: 2px dashed #3498db; margin-bottom: 20px; }
+        
         .form-group { margin-bottom: 15px; }
         .form-label { display: block; margin-bottom: 8px; font-size: 14px; color: #bdc3c7; font-weight: bold; }
         .form-input, .form-select, .form-textarea { width: 100%; padding: 12px; background-color: #2c3e50; border: 1px solid #546e7a; border-radius: 10px; color: white; font-size: 16px; box-sizing: border-box; }
         .form-input:focus, .form-select:focus { outline: none; border-color: #f1c40f; }
-        .form-textarea { min-height: 120px; font-family: monospace; resize: vertical; }
+        .form-textarea { min-height: 100px; font-family: monospace; resize: vertical; }
+        
         .save-btn { width: 100%; padding: 15px; background-color: #f1c40f; color: #1a1a1a; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .save-btn:active { transform: scale(0.98); }
+        .backup-btn { width: 48%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .btn-download { background-color: #27ae60; color: white; }
+        .btn-upload { background-color: #3498db; color: white; }
         
         /* TEST & SONUÇ EKRANLARI */
         #quiz-screen, #result-screen { display: none; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #1a1a1a; z-index: 20; }
@@ -69,6 +74,9 @@
         .score-circle::before { content: ""; position: absolute; width: 80px; height: 80px; background-color: #3e5c6a; border-radius: 50%; }
         .score-text { position: relative; z-index: 2; }
         .home-btn { background-color: #f1c40f; color: #1a1a1a; border: none; padding: 15px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        
+        /* Dosya Yükleme Inputu Gizli */
+        #file-input { display: none; }
     </style>
 </head>
 <body>
@@ -87,7 +95,7 @@
             <div class="tab" onclick="switchTab('B2', this)">B2</div>
             <div class="tab" onclick="switchTab('B1', this)">B1</div>
             <div class="tab active" onclick="switchTab('C', this)">C</div>
-            <div class="tab" onclick="switchTab('ADD', this)">➕ EKLE</div>
+            <div class="tab" onclick="switchTab('ADD', this)">➕ EKLE / YEDEKLE</div>
         </div>
 
         <div class="content-area" id="content-container"></div>
@@ -120,6 +128,8 @@
     </div>
 </div>
 
+<input type="file" id="file-input" accept=".json" onchange="importBackup(this)">
+
 <script>
     // --- SABİT KELİMELER (SİLİNMEZ) ---
     const fixedData = { "YDS": {}, "H": {}, "B2": {}, "B1": {}, "C": {} };
@@ -141,19 +151,16 @@
         {en:"Deficit", tr:"Açık"}, {en:"Define", tr:"Tanımlamak"}, {en:"Definite", tr:"Kesin"}, {en:"Delay", tr:"Gecikmek"},
         {en:"Delicate", tr:"Hassas"}, {en:"Demonstrate", tr:"Göstermek"}, {en:"Denial", tr:"İnkar"}, {en:"Denounce", tr:"Kınamak"}
     ];
-    // Seviye 3 ve 4 boş örnek
     fixedData["C"][3] = [{en:"Derive", tr:"Türetmek"}, {en:"Detect", tr:"Tespit etmek"}]; 
     fixedData["C"][4] = [{en:"Enable", tr:"Olanak sağlamak"}, {en:"Ensure", tr:"Sağlamak"}];
 
     let vocabularyData = {};
-    const DB_KEY = 'myVocabApp_AutoSave_v1';
+    const DB_KEY = 'myVocabApp_Secure_v1';
 
-    // 1. BAŞLATMA: Veriyi hafızadan çek, yoksa sabit veriyi kullan
     function initApp() {
         const stored = localStorage.getItem(DB_KEY);
         if(stored) {
             vocabularyData = JSON.parse(stored);
-            // Sabit verileri her zaman garantiye al (silinmeye karşı)
             for(let cat in fixedData) {
                 for(let lvl in fixedData[cat]) {
                     if(!vocabularyData[cat]) vocabularyData[cat] = {};
@@ -168,9 +175,41 @@
         }
     }
 
-    // 2. OTOMATİK KAYIT (Arka Planda Çalışır)
     function saveToMemory() {
         localStorage.setItem(DB_KEY, JSON.stringify(vocabularyData));
+    }
+
+    // --- YEDEKLEME SİSTEMİ ---
+    function exportBackup() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(vocabularyData));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "kelime_yedegim.json");
+        document.body.appendChild(downloadAnchorNode); // Firefox için gerekli
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+
+    function triggerImport() {
+        document.getElementById('file-input').click();
+    }
+
+    function importBackup(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                vocabularyData = importedData;
+                saveToMemory();
+                alert("Yedek başarıyla yüklendi! Tüm kelimelerin geri geldi.");
+                switchTab('C', null); // Sayfayı yenile
+            } catch(err) {
+                alert("Dosya hatalı görünüyor.");
+            }
+        };
+        reader.readAsText(file);
     }
 
     // --- UYGULAMA AKIŞI ---
@@ -188,7 +227,7 @@
         if(el) el.classList.add('active');
         
         if(cat === 'ADD') {
-            document.getElementById('app-header-title').innerText = "Kelime Ekle";
+            document.getElementById('app-header-title').innerText = "Kelime Ekle / Yedekle";
             renderAddScreen();
         } else {
             activeCategory = cat;
@@ -197,7 +236,6 @@
         }
     }
 
-    // --- LİSTELEME EKRANI ---
     function renderList(cat) {
         const div = document.getElementById('content-container');
         div.innerHTML = "";
@@ -220,7 +258,6 @@
         }
     }
 
-    // --- EKLEME EKRANI ---
     function renderAddScreen() {
         document.getElementById('content-container').innerHTML = `
             <div class="add-word-container">
@@ -237,10 +274,22 @@
                 </div>
 
                 <div style="font-weight:bold; color:#f1c40f; margin-bottom:10px;">2. Kelimeleri Yaz</div>
-                <div style="font-size:12px; color:#bdc3c7; margin-bottom:5px;">Örnek:<br>Apple : Elma<br>Run : Koşmak</div>
-                <textarea id="bulk-txt" class="form-textarea" placeholder="Buraya yapıştır..."></textarea>
+                <textarea id="bulk-txt" class="form-textarea" placeholder="Apple : Elma&#10;Run : Koşmak"></textarea>
                 
                 <button class="save-btn" onclick="addWords()">✅ Otomatik Kaydet</button>
+            </div>
+
+            <div class="backup-container">
+                <div style="font-weight:bold; color:#3498db; margin-bottom:10px;">🛡️ Veri Güvenliği (Yedekleme)</div>
+                <p style="font-size:12px; color:#bdc3c7; margin-bottom:10px;">
+                    Tarayıcı geçmişini temizlersen eklediğin kelimeler silinebilir. 
+                    Emeğini korumak için arada bir <b>"Yedeği İndir"</b> butonuna bas.
+                    Silinirse <b>"Yedeği Yükle"</b> ile geri getirirsin.
+                </p>
+                <div style="display:flex; justify-content:space-between;">
+                    <button class="backup-btn btn-download" onclick="exportBackup()">💾 Yedeği İndir</button>
+                    <button class="backup-btn btn-upload" onclick="triggerImport()">📂 Yedeği Yükle</button>
+                </div>
             </div>
         `;
     }
@@ -256,7 +305,6 @@
         let added = 0;
         
         lines.forEach(line => {
-            // Ayırıcılar: iki nokta, eşittir veya tab
             let splitChar = line.includes(':') ? ':' : (line.includes('=') ? '=' : '\t');
             let parts = line.split(splitChar);
             if(parts.length >= 2) {
@@ -271,8 +319,8 @@
         });
 
         if(added > 0) {
-            saveToMemory(); // ARKA PLANDA KAYDET
-            alert(`${added} kelime başarıyla eklendi! (Otomatik kaydedildi)`);
+            saveToMemory();
+            alert(`${added} kelime başarıyla eklendi!`);
             document.getElementById('bulk-txt').value = "";
         } else {
             alert("Format anlaşılamadı. 'Kelime : Anlam' şeklinde yazmalısın.");
@@ -285,12 +333,9 @@
         let words = vocabularyData[activeCategory][lvl];
         if(!words || words.length === 0) { alert("Bu seviye boş."); return; }
         
-        // Soruları Hazırla
         currentQuestions = words.map(w => {
-            let others = ["Gitmek","Gelmek","Koşmak","Bakmak","Görmek","Duymak","Yazmak"]; // Yedek havuz
-            // Tüm havuzdan rastgele 3 yanlış şık bul
+            let others = ["Gitmek","Gelmek","Koşmak","Bakmak","Görmek","Duymak","Yazmak"]; 
             let pool = [];
-            // O kategorideki tüm kelimeleri havuza ekle
             for(let l=1; l<=20; l++) {
                  if(vocabularyData[activeCategory][l]) pool.push(...vocabularyData[activeCategory][l].map(x=>x.tr));
             }
