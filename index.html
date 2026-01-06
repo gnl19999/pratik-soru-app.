@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Uygulaması - Manuel Yönetim</title>
+    <title>Kelime Uygulaması - Kelime Ekle</title>
     <style>
         /* --- GENEL AYARLAR --- */
         body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #4a6a7a; color: white; display: flex; justify-content: center; user-select: none; }
@@ -22,8 +22,9 @@
         .tab.active { color: #f1c40f; }
         .tab.active::after { content: ''; position: absolute; bottom: -17px; left: 0; width: 100%; height: 3px; background-color: #f1c40f; }
 
-        /* Liste */
-        .level-list { padding: 20px; padding-bottom: 80px; overflow-y: auto; }
+        /* Liste ve İçerik Alanı */
+        .content-area { padding: 20px; padding-bottom: 80px; overflow-y: auto; flex-grow: 1; }
+        
         .level-card { 
             background-color: #3e5c6a; 
             border: 2px solid #d4a35a; 
@@ -37,6 +38,35 @@
         .level-icon { font-size: 28px; margin-right: 15px; }
         .level-info { font-size: 18px; font-weight: bold; }
         .level-progress { color: #ecf0f1; font-size: 14px; font-weight: normal; opacity: 0.8; }
+
+        /* --- KELİME EKLEME FORMU --- */
+        .add-word-container {
+            background-color: #3e5c6a;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px dashed #bdc3c7;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-size: 14px; color: #bdc3c7; font-weight: bold; }
+        
+        .form-input, .form-select {
+            width: 100%; padding: 15px;
+            background-color: #2c3e50;
+            border: 1px solid #546e7a;
+            border-radius: 10px;
+            color: white; font-size: 16px;
+            box-sizing: border-box;
+        }
+        .form-input:focus, .form-select:focus { outline: none; border-color: #f1c40f; }
+
+        .save-btn {
+            width: 100%; padding: 15px;
+            background-color: #f1c40f; color: #1a1a1a;
+            border: none; border-radius: 10px;
+            font-size: 18px; font-weight: bold; cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .save-btn:active { transform: scale(0.98); }
 
         /* --- TEST EKRANI --- */
         #quiz-screen { 
@@ -106,10 +136,10 @@
             <div class="tab" onclick="switchTab('B2', this)">B2</div>
             <div class="tab" onclick="switchTab('B1', this)">B1</div>
             <div class="tab" onclick="switchTab('A2', this)">A2</div>
-            <div class="tab" onclick="switchTab('A1', this)">A1</div>
+            <div class="tab" onclick="switchTab('ADD', this)">➕ Kelime Ekle</div>
         </div>
 
-        <div class="level-list" id="level-container">
+        <div class="content-area" id="content-container">
             </div>
     </div>
 
@@ -149,80 +179,34 @@
 
 <script>
     /* ================================================================
-       KELİME VERİTABANI (MANUEL DÜZENLEME ALANI)
-       ================================================================
-       Yapı: vocabularyData['KategoriAdı'][SeviyeNumarası] = [Kelimeler];
-    */
-    
-    // Veritabanı yapısını oluşturuyoruz
+       VERİTABANI
+       ================================================================ */
     const vocabularyData = {
-        "YDS": {},
-        "C": {},
-        "B2": {},
-        "B1": {},
-        "A2": {},
-        "A1": {}
+        "YDS": {}, "C": {}, "B2": {}, "B1": {}, "A2": {}
     };
 
-    // ----------------------------------------------------------------
-    // 1. C SEKMESİ
-    // ----------------------------------------------------------------
-    
-    // C - SEVİYE 6 (Sizin verdiğiniz özel kelimeler - DOKUNMA)
+    // --- C / Seviye 6 (Sabit Kelimeler) ---
     vocabularyData["C"][6] = [
-        { en: "Abandon", tr: "Terk etmek, vazgeçmek" },
-        { en: "Abolish", tr: "Yürürlükten kaldırmak" },
-        { en: "Accomplish", tr: "Başarmak, tamamlamak" },
-        { en: "Accumulate", tr: "Biriktirmek, çoğalmak" },
-        { en: "Acquire", tr: "Edinmek, kazanmak" },
-        { en: "Adopt", tr: "Evlat edinmek / Benimsemek" },
-        { en: "Advocate", tr: "Savunmak, desteklemek" },
-        { en: "Alleviate", tr: "Hafifletmek, yatıştırmak" },
-        { en: "Alter", tr: "Değiştirmek" },
-        { en: "Ambiguity", tr: "Belirsizlik" },
-        { en: "Assess", tr: "Değerlendirmek" },
-        { en: "Benefit", tr: "Faydalanmak" },
-        { en: "Boost", tr: "Artırmak, yükseltmek" },
-        { en: "Coincide", tr: "Rastlamak" },
-        { en: "Compensate (for)", tr: "Telafi etmek" },
-        { en: "Comprise", tr: "-den oluşmak" },
-        { en: "Conceal", tr: "Gizlemek, saklamak" },
-        { en: "Conduct", tr: "Yürütmek" },
-        { en: "Confine", tr: "Sınırlandırmak" },
-        { en: "Cope with", tr: "Başa çıkmak" }
+        { en: "Abandon", tr: "Terk etmek, vazgeçmek" }, { en: "Abolish", tr: "Yürürlükten kaldırmak" },
+        { en: "Accomplish", tr: "Başarmak, tamamlamak" }, { en: "Accumulate", tr: "Biriktirmek, çoğalmak" },
+        { en: "Acquire", tr: "Edinmek, kazanmak" }, { en: "Adopt", tr: "Evlat edinmek / Benimsemek" },
+        { en: "Advocate", tr: "Savunmak, desteklemek" }, { en: "Alleviate", tr: "Hafifletmek, yatıştırmak" },
+        { en: "Alter", tr: "Değiştirmek" }, { en: "Ambiguity", tr: "Belirsizlik" },
+        { en: "Assess", tr: "Değerlendirmek" }, { en: "Benefit", tr: "Faydalanmak" },
+        { en: "Boost", tr: "Artırmak, yükseltmek" }, { en: "Coincide", tr: "Rastlamak" },
+        { en: "Compensate (for)", tr: "Telafi etmek" }, { en: "Comprise", tr: "-den oluşmak" },
+        { en: "Conceal", tr: "Gizlemek, saklamak" }, { en: "Conduct", tr: "Yürütmek" },
+        { en: "Confine", tr: "Sınırlandırmak" }, { en: "Cope with", tr: "Başa çıkmak" }
     ];
 
-    // C - SEVİYE 1 (Örnek Manuel Ekleme Alanı)
-    vocabularyData["C"][1] = [
-        // Buraya 20 kelime ekleyebilirsin: { en: "Word", tr: "Anlam" },
-    ];
-
-    // ----------------------------------------------------------------
-    // 2. B2 SEKMESİ (Örnek)
-    // ----------------------------------------------------------------
-    vocabularyData["B2"][1] = [
-        // Buraya B2 Seviye 1 kelimelerini ekleyebilirsin
-    ];
-
-
-    /* ================================================================
-       OTOMATİK DOLDURMA (BOŞ KALAN YERLER İÇİN)
-       Siz manuel ekleyene kadar uygulama hata vermesin diye boş kalan
-       seviyeleri geçici kelimelerle dolduruyoruz.
-       ================================================================
-    */
-    const categories = ["YDS", "C", "B2", "B1", "A2", "A1"];
-    
+    // Otomatik Doldurma (Boş kalmasın diye)
+    const categories = ["YDS", "C", "B2", "B1", "A2"];
     categories.forEach(cat => {
         for (let i = 1; i <= 20; i++) {
-            // Eğer o seviye için manuel veri girilmemişse, otomatik doldur
             if (!vocabularyData[cat][i] || vocabularyData[cat][i].length === 0) {
                 let tempWords = [];
                 for (let k = 1; k <= 20; k++) {
-                    tempWords.push({
-                        en: `${cat} L${i} - Word ${k}`, // Örn: C L5 - Word 1
-                        tr: `Anlam ${k}`
-                    });
+                    tempWords.push({ en: `${cat} L${i} - Word ${k}`, tr: `Anlam ${k}` });
                 }
                 vocabularyData[cat][i] = tempWords;
             }
@@ -237,58 +221,133 @@
     let currentStep = 0;
     let correctCount = 0;
 
-    // Başlangıçta C sekmesini aç
     window.onload = function() {
         renderLevelList('C');
     };
 
     function switchTab(catName, tabElement) {
-        // Sekme görünümlerini güncelle
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         tabElement.classList.add('active');
-        
-        // Aktif kategoriyi değiştir ve listeyi yenile
-        activeCategory = catName;
-        document.getElementById('app-header-title').innerText = `${catName} - Seviyesi`;
-        renderLevelList(catName);
+
+        if (catName === 'ADD') {
+            // Kelime Ekleme Sayfası
+            document.getElementById('app-header-title').innerText = "Kelime Ekle";
+            renderAddWordForm();
+        } else {
+            // Normal Seviye Listesi
+            activeCategory = catName;
+            document.getElementById('app-header-title').innerText = `${catName} - Seviyesi`;
+            renderLevelList(catName);
+        }
     }
 
+    // --- 1. LİSTE GÖRÜNÜMÜ ---
     function renderLevelList(catName) {
-        const container = document.getElementById('level-container');
+        const container = document.getElementById('content-container');
         container.innerHTML = "";
         const icons = ["🛡️", "✍️", "🔍", "💭", "📚", "👑", "🚀", "💎", "🧩", "🔥"];
 
         for (let i = 1; i <= TOTAL_LEVELS; i++) {
+            // O seviyedeki kelime sayısını göster
+            let count = vocabularyData[catName][i] ? vocabularyData[catName][i].length : 0;
+            
             let html = `
                 <div class="level-card" onclick="startQuiz(${i})">
                     <div class="card-left">
                         <div class="level-icon">${icons[(i-1)%icons.length]}</div>
                         <div class="level-info">${i}. Seviye</div>
                     </div>
-                    <div class="level-progress">(Başla)</div>
+                    <div class="level-progress">(${count} Kelime)</div>
                 </div>
             `;
             container.innerHTML += html;
         }
     }
 
-    function startQuiz(levelIndex) {
-        // İlgili kategori ve seviyedeki kelimeleri al
-        let levelWords = vocabularyData[activeCategory][levelIndex];
+    // --- 2. KELİME EKLEME FORMU ---
+    function renderAddWordForm() {
+        const container = document.getElementById('content-container');
+        
+        container.innerHTML = `
+            <div class="add-word-container">
+                <div class="form-group">
+                    <label class="form-label">İngilizce Kelime</label>
+                    <input type="text" id="new-en" class="form-input" placeholder="Örn: Resilience">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Türkçe Karşılığı</label>
+                    <input type="text" id="new-tr" class="form-input" placeholder="Örn: Direnç, esneklik">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Kategori Seç</label>
+                    <select id="new-cat" class="form-select">
+                        <option value="YDS">YDS</option>
+                        <option value="C" selected>C</option>
+                        <option value="B2">B2</option>
+                        <option value="B1">B1</option>
+                        <option value="A2">A2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Seviye Seç (1-20)</label>
+                    <select id="new-lvl" class="form-select">
+                        ${generateLevelOptions()}
+                    </select>
+                </div>
+                <button class="save-btn" onclick="saveNewWord()">Kelimeyi Kaydet</button>
+            </div>
+            <div style="text-align:center; margin-top:20px; color:#bdc3c7; font-size:14px;">
+                * Eklenen kelimeler anında listelere dahil edilir.
+            </div>
+        `;
+    }
 
-        // Eğer kelime yoksa veya eksikse hata vermesin
-        if (!levelWords || levelWords.length === 0) {
-            alert("Bu seviye için henüz kelime eklenmemiş.");
+    function generateLevelOptions() {
+        let opts = "";
+        for(let i=1; i<=20; i++) opts += `<option value="${i}">${i}. Seviye</option>`;
+        return opts;
+    }
+
+    function saveNewWord() {
+        const en = document.getElementById('new-en').value.trim();
+        const tr = document.getElementById('new-tr').value.trim();
+        const cat = document.getElementById('new-cat').value;
+        const lvl = parseInt(document.getElementById('new-lvl').value);
+
+        if(!en || !tr) {
+            alert("Lütfen İngilizce ve Türkçe alanlarını doldurun.");
             return;
         }
 
-        // Soruları oluştur
+        // Veritabanına ekle
+        if (!vocabularyData[cat][lvl]) vocabularyData[cat][lvl] = [];
+        
+        // Listenin başına ekle (en son eklenen en başta görünsün diye veya sona)
+        vocabularyData[cat][lvl].push({ en: en, tr: tr });
+
+        alert(`"${en}" kelimesi ${cat} - ${lvl}. Seviyeye eklendi!`);
+        
+        // Formu temizle
+        document.getElementById('new-en').value = "";
+        document.getElementById('new-tr').value = "";
+    }
+
+    // --- 3. TEST (QUIZ) ---
+    function startQuiz(levelIndex) {
+        // Form görünümündeysek testi başlatma
+        if(activeCategory === 'ADD') return;
+
+        let levelWords = vocabularyData[activeCategory][levelIndex];
+        if (!levelWords || levelWords.length === 0) {
+            alert("Bu seviye boş.");
+            return;
+        }
+
         generateQuestions(levelWords);
         
-        // Ekranı aç
         document.getElementById('home-screen').style.display = 'none';
         document.getElementById('quiz-screen').style.display = 'flex';
-        document.querySelector('.quiz-title').innerText = `${activeCategory} - ${levelIndex}. Seviye`;
+        document.querySelector('.quiz-title').innerText = `${activeCategory} - ${levelIndex}. Seviye Testi`;
         
         currentStep = 0;
         correctCount = 0;
@@ -298,32 +357,27 @@
     function generateQuestions(words) {
         currentQuestions = words.map(word => {
             let correct = word.tr;
-            
-            // Yanlış cevapları aynı listedeki diğer kelimelerden seç
             let distractors = [];
             let safetyLoop = 0;
             
-            while(distractors.length < 3 && safetyLoop < 50) {
-                let randomWord = words[Math.floor(Math.random() * words.length)];
+            // Eğer kelime sayısı az ise (örn: sadece 1 kelime ekledin), şık bulamaz.
+            // Bu yüzden "yedek" kelimelerden de faydalanalım.
+            let pool = [...words];
+            if(pool.length < 4) {
+                // Havuz çok küçükse rastgele kelimeler üretelim ki şıklar dolsun
+                pool.push({tr: "Seçenek A"}, {tr: "Seçenek B"}, {tr: "Seçenek C"});
+            }
+
+            while(distractors.length < 3 && safetyLoop < 100) {
+                let randomWord = pool[Math.floor(Math.random() * pool.length)];
                 if(randomWord.tr !== correct && !distractors.includes(randomWord.tr)) {
                     distractors.push(randomWord.tr);
                 }
                 safetyLoop++;
             }
             
-            // Eğer listede yeterli kelime yoksa (örn: test aşamasında sadece 2 kelime varsa)
-            // Sistem çökmemesi için sahte yanlış cevap ekle
-            while(distractors.length < 3) {
-                distractors.push("Diğer Seçenek " + (distractors.length+1));
-            }
-
             let options = [...distractors, correct].sort(() => 0.5 - Math.random());
-            
-            return {
-                en: word.en,
-                correct: correct,
-                options: options
-            };
+            return { en: word.en, correct: correct, options: options };
         });
     }
 
@@ -334,7 +388,6 @@
         }
 
         const data = currentQuestions[currentStep];
-        
         document.getElementById('target-word').innerText = data.en;
         document.getElementById('progress-text').innerText = `${currentStep + 1}/${currentQuestions.length}`;
         document.getElementById('progress-fill').style.width = `${((currentStep + 1) / currentQuestions.length) * 100}%`;
@@ -358,10 +411,8 @@
         if (selected === correct) {
             btn.classList.add('correct');
             correctCount++;
-            
             const overlay = document.getElementById('success-overlay');
             overlay.style.display = 'flex';
-            
             setTimeout(() => {
                 overlay.style.display = 'none';
                 currentStep++;
@@ -380,16 +431,14 @@
     }
 
     function quitQuiz() {
-        if(confirm("Testten çıkmak istiyor musun?")) closeResultScreen();
+        if(confirm("Çıkmak istiyor musun?")) closeResultScreen();
     }
 
     function showResult() {
         document.getElementById('quiz-screen').style.display = 'none';
         document.getElementById('result-screen').style.display = 'flex';
-        
         let total = currentQuestions.length;
         document.getElementById('final-score').innerText = `${correctCount}/${total}`;
-        
         let percentage = (correctCount / total) * 100;
         let color = percentage >= 50 ? '#a2c638' : '#e74c3c';
         document.querySelector('.score-circle').style.background = `conic-gradient(${color} 0% ${percentage}%, #333 ${percentage}% 100%)`;
@@ -400,7 +449,6 @@
         document.getElementById('quiz-screen').style.display = 'none';
         document.getElementById('home-screen').style.display = 'flex';
     }
-
 </script>
 
 </body>
