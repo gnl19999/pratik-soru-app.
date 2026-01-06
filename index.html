@@ -3,25 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Uygulaması - Kayıtlı Sürüm</title>
+    <title>Kelime Uygulaması - C Seviyesi</title>
     <style>
         /* --- GENEL AYARLAR --- */
         body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #4a6a7a; color: white; display: flex; justify-content: center; user-select: none; }
         .app-container { width: 100%; max-width: 500px; min-height: 100vh; position: relative; background-color: #4a6a7a; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* --- BAŞLIK --- */
+        /* --- ANASAYFA --- */
+        #home-screen { display: flex; flex-direction: column; height: 100%; }
         header.home-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #354f5c; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .settings-icon { font-size: 24px; cursor: pointer; color: #f1c40f; }
         .app-title { font-size: 20px; font-weight: bold; }
         .profile-pic { width: 40px; height: 40px; background-color: #f3d290; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; overflow: hidden; }
         
-        /* --- SEKMELER --- */
+        /* Sekmeler */
         .tabs { display: flex; justify-content: space-around; padding: 15px 0; background-color: #354f5c; position: sticky; top: 70px; z-index: 10; overflow-x: auto; }
         .tab { color: #bdc3c7; font-weight: bold; padding: 5px 10px; cursor: pointer; font-size: 15px; position: relative; white-space: nowrap; }
         .tab.active { color: #f1c40f; }
         .tab.active::after { content: ''; position: absolute; bottom: -17px; left: 0; width: 100%; height: 3px; background-color: #f1c40f; }
 
-        /* --- LİSTE ALANI --- */
+        /* İçerik Alanı */
         .content-area { padding: 20px; padding-bottom: 80px; overflow-y: auto; flex-grow: 1; }
         
         .level-card { 
@@ -38,7 +39,7 @@
         .level-info { font-size: 18px; font-weight: bold; }
         .level-progress { color: #ecf0f1; font-size: 14px; font-weight: normal; opacity: 0.8; }
 
-        /* --- FORM ALANI --- */
+        /* --- KELİME EKLEME FORMU --- */
         .add-word-container { background-color: #3e5c6a; padding: 25px; border-radius: 15px; border: 2px dashed #bdc3c7; }
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; margin-bottom: 8px; font-size: 14px; color: #bdc3c7; font-weight: bold; }
@@ -68,7 +69,7 @@
         #success-overlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; background-color: #a2c638; border-radius: 50%; justify-content: center; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 50; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .checkmark { width: 40px; height: 70px; border-bottom: 10px solid white; border-right: 10px solid white; transform: rotate(45deg); margin-top: -15px; }
         @keyframes popIn { 0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
-        
+
         /* --- SONUÇ EKRANI --- */
         #result-screen { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(26, 26, 26, 0.95); z-index: 60; backdrop-filter: blur(5px); }
         .result-card { background-color: #3e5c6a; width: 80%; padding: 30px; border-radius: 20px; text-align: center; border: 2px solid #d4a35a; }
@@ -91,10 +92,10 @@
 
         <div class="tabs">
             <div class="tab" onclick="switchTab('YDS', this)">YDS</div>
-            <div class="tab active" onclick="switchTab('C', this)">C</div>
+            <div class="tab" onclick="switchTab('H', this)">HABER-MAKALE</div>
             <div class="tab" onclick="switchTab('B2', this)">B2</div>
             <div class="tab" onclick="switchTab('B1', this)">B1</div>
-            <div class="tab" onclick="switchTab('A2', this)">A2</div>
+            <div class="tab active" onclick="switchTab('C', this)">C</div>
             <div class="tab" onclick="switchTab('ADD', this)">➕ Kelime Ekle</div>
         </div>
 
@@ -122,7 +123,9 @@
     <div id="result-screen">
         <div class="result-card">
             <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">Seviye Tamamlandı!</div>
-            <div class="score-circle" id="score-circle"><span class="score-text" id="final-score">0/20</span></div>
+            <div class="score-circle" id="score-circle">
+                <span class="score-text" id="final-score">0/20</span>
+            </div>
             <div style="color: #bdc3c7;">Tebrikler!</div>
             <button class="home-btn" onclick="closeResultScreen()">Ana Sayfaya Dön</button>
         </div>
@@ -132,89 +135,97 @@
 
 <script>
     /* ================================================================
-       VERİ YÖNETİMİ (LOCAL STORAGE)
-       ================================================================
-    */
+       VERİTABANI VE LOCAL STORAGE (KAYIT SİSTEMİ)
+       ================================================================ */
     
-    // Varsayılan Veriler (Sadece ilk açılışta yüklenir)
+    // Varsayılan boş yapı (İlk açılışta kullanılır)
     const defaultData = {
-        "YDS": {}, "C": {}, "B2": {}, "B1": {}, "A2": {}
+        "YDS": {}, "H": {}, "B2": {}, "B1": {}, "C": {}
     };
-    
-    // C Seviyesi 6. Kısım için Özel Kelimeler
-    defaultData["C"][6] = [
-        { en: "Abandon", tr: "Terk etmek, vazgeçmek" }, { en: "Abolish", tr: "Yürürlükten kaldırmak" },
-        { en: "Accomplish", tr: "Başarmak, tamamlamak" }, { en: "Accumulate", tr: "Biriktirmek, çoğalmak" },
-        { en: "Acquire", tr: "Edinmek, kazanmak" }, { en: "Adopt", tr: "Evlat edinmek / Benimsemek" },
-        { en: "Advocate", tr: "Savunmak, desteklemek" }, { en: "Alleviate", tr: "Hafifletmek, yatıştırmak" },
-        { en: "Alter", tr: "Değiştirmek" }, { en: "Ambiguity", tr: "Belirsizlik" },
-        { en: "Assess", tr: "Değerlendirmek" }, { en: "Benefit", tr: "Faydalanmak" },
-        { en: "Boost", tr: "Artırmak, yükseltmek" }, { en: "Coincide", tr: "Rastlamak" },
-        { en: "Compensate (for)", tr: "Telafi etmek" }, { en: "Comprise", tr: "-den oluşmak" },
-        { en: "Conceal", tr: "Gizlemek, saklamak" }, { en: "Conduct", tr: "Yürütmek" },
-        { en: "Confine", tr: "Sınırlandırmak" }, { en: "Cope with", tr: "Başa çıkmak" },
-    ];
-        // C Seviyesi 1. Kısım için Özel Kelimeler
+
+    // --- C / Seviye 1'e Eklenen Kelimeler ---
     defaultData["C"][1] = [
-  { "en": "Abandon", "tr": "Terk etmek, vazgeçmek" },
-  { "en": "Abolish", "tr": "Yürürlükten kaldırmak" },
-  { "en": "Accomplish", "tr": "Başarmak, tamamlamak" },
-  { "en": "Accumulate", "tr": "Biriktirmek, çoğalmak" },
-  { "en": "Acquire", "tr": "Edinmek, kazanmak" },
-  { "en": "Adopt", "tr": "Evlat edinmek / Benimsemek" },
-  { "en": "Advocate", "tr": "Savunmak, desteklemek" },
-  { "en": "Alleviate", "tr": "Hafifletmek, yatıştırmak" },
-  { "en": "Alter", "tr": "Değiştirmek" },
-  { "en": "Ambiguity", "tr": "Belirsizlik" },
-  { "en": "Assess", "tr": "Değerlendirmek" },
-  { "en": "Benefit", "tr": "Faydalanmak, yarar sağlamak" },
-  { "en": "Boost", "tr": "Artırmak, yükseltmek" },
-  { "en": "Coincide", "tr": "Rastlamak, aynı zamana denk gelmek" },
-  { "en": "Compensate (for)", "tr": "Telafi etmek" },
-  { "en": "Comprise", "tr": "-den oluşmak, kapsamak" },
-  { "en": "Conceal", "tr": "Gizlemek, saklamak" },
-  { "en": "Conduct", "tr": "Yürütmek (deney, anket vb.)" },
-  { "en": "Confine", "tr": "Sınırlandırmak, hapsetmek" },
-  { "en": "Cope with", "tr": "Başa çıkmak, üstesinden gelmek" },
-];
+        { "en": "Abandon", "tr": "Terk etmek, vazgeçmek" },
+        { "en": "Abolish", "tr": "Yürürlükten kaldırmak" },
+        { "en": "Accomplish", "tr": "Başarmak, tamamlamak" },
+        { "en": "Accumulate", "tr": "Biriktirmek, çoğalmak" },
+        { "en": "Acquire", "tr": "Edinmek, kazanmak" },
+        { "en": "Adopt", "tr": "Evlat edinmek / Benimsemek" },
+        { "en": "Advocate", "tr": "Savunmak, desteklemek" },
+        { "en": "Alleviate", "tr": "Hafifletmek, yatıştırmak" },
+        { "en": "Alter", "tr": "Değiştirmek" },
+        { "en": "Ambiguity", "tr": "Belirsizlik" },
+        { "en": "Assess", "tr": "Değerlendirmek" },
+        { "en": "Benefit", "tr": "Faydalanmak, yarar sağlamak" },
+        { "en": "Boost", "tr": "Artırmak, yükseltmek" },
+        { "en": "Coincide", "tr": "Rastlamak, aynı zamana denk gelmek" },
+        { "en": "Compensate (for)", "tr": "Telafi etmek" },
+        { "en": "Comprise", "tr": "-den oluşmak, kapsamak" },
+        { "en": "Conceal", "tr": "Gizlemek, saklamak" },
+        { "en": "Conduct", "tr": "Yürütmek (deney, anket vb.)" },
+        { "en": "Confine", "tr": "Sınırlandırmak, hapsetmek" },
+        { "en": "Cope with", "tr": "Başa çıkmak, üstesinden gelmek" }
+    ];
 
     let vocabularyData = {};
+    
+    // Veri Anahtarı (Değişikliklerin görünmesi için güncellendi)
+    const STORAGE_KEY = 'myVocabApp_Data_v4';
 
-    // 1. Veriyi Yükle (Varsa hafızadan, yoksa varsayılandan)
+    // 1. Veriyi Yükle
     function loadData() {
-        const stored = localStorage.getItem('myVocabApp_v2');
+        const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             vocabularyData = JSON.parse(stored);
+            
+            // Eğer kaydedilmiş veri varsa ama C seviye 1 boşsa veya eski veri varsa, günceliyle birleştir
+            if (!vocabularyData["C"][1] || vocabularyData["C"][1].length === 0) {
+                 vocabularyData["C"][1] = defaultData["C"][1];
+            }
         } else {
-            vocabularyData = defaultData;
-            saveData(); // Varsayılanı kaydet
+            vocabularyData = JSON.parse(JSON.stringify(defaultData)); // Derin kopya
+            saveData();
         }
     }
 
-    // 2. Veriyi Kaydet (Tarayıcı hafızasına)
+    // 2. Veriyi Kaydet
     function saveData() {
-        localStorage.setItem('myVocabApp_v2', JSON.stringify(vocabularyData));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabularyData));
     }
 
-    // Başlangıçta veriyi çek
+    // Uygulama başlarken veriyi çek
     loadData();
 
-    // --- UYGULAMA DEĞİŞKENLERİ ---
+
+    /* ================================================================
+       UYGULAMA MANTIĞI
+       ================================================================ */
+
     const TOTAL_LEVELS = 20;
-    let activeCategory = 'C';
+    let activeCategory = 'C'; // Başlangıçta C sekmesi açık olsun
     let currentQuestions = [];
     let currentStep = 0;
     let correctCount = 0;
 
-    // Sayfa Yüklendiğinde
     window.onload = function() {
-        renderLevelList('C');
+        // İlk açılışta C sekmesini yükle
+        switchTab('C', document.querySelector('.tabs .tab.active')); 
     };
 
-    // --- SEKMELER ARASI GEÇİŞ ---
     function switchTab(catName, tabElement) {
+        // Görsel güncelleme
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        tabElement.classList.add('active');
+        // Eğer tabElement null değilse (sayfa ilk yüklenirken bazen manuel çağırıyoruz)
+        if(tabElement) tabElement.classList.add('active');
+        else {
+             // Eğer element verilmediyse (onload durumunda) text içeriğine göre bul
+             const tabs = document.querySelectorAll('.tab');
+             tabs.forEach(t => {
+                 if((catName === 'ADD' && t.innerText.includes('Ekle')) || t.innerText === catName) {
+                     t.classList.add('active');
+                 }
+             });
+        }
 
         if (catName === 'ADD') {
             document.getElementById('app-header-title').innerText = "Kelime Ekle";
@@ -226,24 +237,23 @@
         }
     }
 
-    // --- LİSTELEME ---
+    // --- 1. LİSTE GÖRÜNÜMÜ ---
     function renderLevelList(catName) {
         const container = document.getElementById('content-container');
         container.innerHTML = "";
         const icons = ["🛡️", "✍️", "🔍", "💭", "📚", "👑", "🚀", "💎", "🧩", "🔥"];
 
         for (let i = 1; i <= TOTAL_LEVELS; i++) {
-            // Veri kontrolü
-            if (!vocabularyData[catName][i]) {
-                vocabularyData[catName][i] = []; // Boşsa dizi oluştur
-            }
-            
+            // Veri kontrolü ve başlatma
+            if (!vocabularyData[catName]) vocabularyData[catName] = {};
+            if (!vocabularyData[catName][i]) vocabularyData[catName][i] = [];
+
             let count = vocabularyData[catName][i].length;
             let statusText = count > 0 ? `(${count} Kelime)` : "(Boş)";
-            let opacityClass = count > 0 ? "" : "style='opacity:0.6;'"; // Boşsa soluk dursun
+            let opacityStyle = count > 0 ? "" : "style='opacity: 0.6;'";
 
             let html = `
-                <div class="level-card" onclick="startQuiz(${i})" ${opacityClass}>
+                <div class="level-card" onclick="startQuiz(${i})" ${opacityStyle}>
                     <div class="card-left">
                         <div class="level-icon">${icons[(i-1)%icons.length]}</div>
                         <div class="level-info">${i}. Seviye</div>
@@ -255,7 +265,7 @@
         }
     }
 
-    // --- KELİME EKLEME FORMU ---
+    // --- 2. KELİME EKLEME FORMU ---
     function renderAddWordForm() {
         const container = document.getElementById('content-container');
         container.innerHTML = `
@@ -266,16 +276,16 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Türkçe Karşılığı</label>
-                    <input type="text" id="new-tr" class="form-input" placeholder="Örn: Direnç">
+                    <input type="text" id="new-tr" class="form-input" placeholder="Örn: Direnç, esneklik">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Kategori Seç</label>
                     <select id="new-cat" class="form-select">
                         <option value="YDS">YDS</option>
-                        <option value="C">C</option>
+                        <option value="H">HABER-MAKALE</option>
                         <option value="B2">B2</option>
                         <option value="B1">B1</option>
-                        <option value="A2">A2</option>
+                        <option value="C" selected>C</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -286,8 +296,8 @@
                 </div>
                 <button class="save-btn" onclick="saveNewWord()">Kelimeyi Kaydet</button>
             </div>
-            <div style="text-align:center; margin-top:20px; color:#bdc3c7; font-size:13px;">
-                * Eklediğin kelimeler tarayıcına kaydedilir.
+            <div style="text-align:center; margin-top:20px; color:#bdc3c7; font-size:14px;">
+                * Eklenen kelimeler hafızaya kaydedilir.
             </div>
         `;
     }
@@ -305,39 +315,38 @@
         const lvl = parseInt(document.getElementById('new-lvl').value);
 
         if(!en || !tr) {
-            alert("Lütfen tüm alanları doldur.");
+            alert("Lütfen tüm alanları doldurun.");
             return;
         }
 
-        // Kategori veya seviye dizisi yoksa oluştur
+        // Nesne yapısını kontrol et
         if (!vocabularyData[cat]) vocabularyData[cat] = {};
         if (!vocabularyData[cat][lvl]) vocabularyData[cat][lvl] = [];
-        
+
         // Ekle
         vocabularyData[cat][lvl].push({ en: en, tr: tr });
-        
-        // KAYDET (Kritik nokta burası)
+
+        // KAYDET (Local Storage)
         saveData();
 
-        alert(`"${en}" kelimesi ${cat} kategorisi ${lvl}. seviyeye eklendi!`);
+        alert(`"${en}" kelimesi ${cat} kategorisi ${lvl}. seviyeye başarıyla eklendi!`);
         
-        // Alanları temizle
+        // Formu temizle
         document.getElementById('new-en').value = "";
         document.getElementById('new-tr').value = "";
     }
 
-    // --- TEST (QUIZ) MANTIĞI ---
+    // --- 3. TEST (QUIZ) ---
     function startQuiz(levelIndex) {
         if(activeCategory === 'ADD') return;
 
         let levelWords = vocabularyData[activeCategory][levelIndex];
-        
+
         if (!levelWords || levelWords.length === 0) {
-            alert("Bu seviyede henüz kelime yok. 'Kelime Ekle' sekmesinden ekleyebilirsin.");
+            alert("Bu seviyede henüz kelime yok. Lütfen 'Kelime Ekle' sekmesinden kelime ekleyin.");
             return;
         }
 
-        // Test hazırlığı
         generateQuestions(levelWords);
         
         document.getElementById('home-screen').style.display = 'none';
@@ -354,12 +363,8 @@
             let correct = word.tr;
             let distractors = [];
             
-            // Havuz oluştur (kendi listesinden veya genel havuzdan şık üretmek için)
-            // Eğer listede çok az kelime varsa (örn: 1 tane), şık üretemeyiz.
-            // Bu yüzden "dummy" (sahte) seçenekler ekleyelim ki test çalışsın.
-            let dummyPool = ["Gitmek", "Gelmek", "Koşmak", "Yüzmek", "Uçmak", "Düşünmek", "Anlamak"];
-            
-            // Kelime listesi + Dummy pool birleşimi
+            // Yeterli kelime yoksa sahte şıklar üret (Havuz Mantığı)
+            let dummyPool = ["Gitmek", "Gelmek", "Koşmak", "Yüzmek", "Uçmak", "Düşünmek", "Anlamak", "Görmek", "Hissetmek"];
             let pool = [...words.map(w => w.tr), ...dummyPool];
 
             while(distractors.length < 3) {
@@ -441,7 +446,7 @@
         document.getElementById('result-screen').style.display = 'none';
         document.getElementById('quiz-screen').style.display = 'none';
         document.getElementById('home-screen').style.display = 'flex';
-        // Listeyi güncelle ki ilerleme durumu görünsün (ileride eklenebilir)
+        // Listeyi güncelle ki yeni eklenenler veya ilerleme görünsün
         renderLevelList(activeCategory);
     }
 </script>
