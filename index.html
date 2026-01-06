@@ -182,11 +182,11 @@
        VERİTABANI
        ================================================================ */
     const vocabularyData = {
-        "YDS": {}, "C": {}, "B2": {}, "B1": {}, "A2": {}
+        "YDS": {}, "H": {}, "B2": {}, "B1": {}, "A2": {}
     };
 
     // --- C / Seviye 6 (Sabit Kelimeler) ---
-    vocabularyData["C"][6] = [
+    vocabularyData["H"][6] = [
         { en: "Abandon", tr: "Terk etmek, vazgeçmek" }, { en: "Abolish", tr: "Yürürlükten kaldırmak" },
         { en: "Accomplish", tr: "Başarmak, tamamlamak" }, { en: "Accumulate", tr: "Biriktirmek, çoğalmak" },
         { en: "Acquire", tr: "Edinmek, kazanmak" }, { en: "Adopt", tr: "Evlat edinmek / Benimsemek" },
@@ -200,7 +200,7 @@
     ];
 
     // Otomatik Doldurma (Boş kalmasın diye)
-    const categories = ["YDS", "C", "B2", "B1", "A2"];
+    const categories = ["YDS", "H", "B2", "B1", "A2"];
     categories.forEach(cat => {
         for (let i = 1; i <= 20; i++) {
             if (!vocabularyData[cat][i] || vocabularyData[cat][i].length === 0) {
@@ -282,7 +282,7 @@
                     <label class="form-label">Kategori Seç</label>
                     <select id="new-cat" class="form-select">
                         <option value="YDS">YDS</option>
-                        <option value="C" selected>C</option>
+                        <option value="H" selected>C</option>
                         <option value="B2">B2</option>
                         <option value="B1">B1</option>
                         <option value="A2">A2</option>
