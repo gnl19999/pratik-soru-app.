@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Uygulaması - C Seviye 3-4 Eklendi</title>
+    <title>Kelime Uygulaması - Toplu Ekleme Özellikli</title>
     <style>
         /* --- GENEL AYARLAR --- */
         body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #4a6a7a; color: white; display: flex; justify-content: center; user-select: none; }
@@ -40,13 +40,21 @@
         .level-progress { color: #ecf0f1; font-size: 14px; font-weight: normal; opacity: 0.8; }
 
         /* --- KELİME EKLEME FORMU --- */
-        .add-word-container { background-color: #3e5c6a; padding: 25px; border-radius: 15px; border: 2px dashed #bdc3c7; }
-        .form-group { margin-bottom: 20px; }
+        .add-section-title { font-size: 18px; font-weight: bold; color: #f1c40f; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; }
+        .add-word-container { background-color: #3e5c6a; padding: 20px; border-radius: 15px; border: 2px dashed #bdc3c7; margin-bottom: 20px; }
+        
+        .form-group { margin-bottom: 15px; }
         .form-label { display: block; margin-bottom: 8px; font-size: 14px; color: #bdc3c7; font-weight: bold; }
-        .form-input, .form-select { width: 100%; padding: 15px; background-color: #2c3e50; border: 1px solid #546e7a; border-radius: 10px; color: white; font-size: 16px; box-sizing: border-box; }
-        .form-input:focus, .form-select:focus { outline: none; border-color: #f1c40f; }
-        .save-btn { width: 100%; padding: 15px; background-color: #f1c40f; color: #1a1a1a; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 12px; background-color: #2c3e50; border: 1px solid #546e7a; border-radius: 10px; color: white; font-size: 16px; box-sizing: border-box; }
+        .form-textarea { min-height: 150px; font-family: monospace; line-height: 1.5; resize: vertical; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #f1c40f; }
+        
+        .save-btn { width: 100%; padding: 15px; background-color: #f1c40f; color: #1a1a1a; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.1s; margin-top: 10px; }
         .save-btn:active { transform: scale(0.98); }
+        .save-btn.secondary { background-color: #3498db; color: white; }
+
+        .helper-text { font-size: 12px; color: #bdc3c7; margin-top: 5px; line-height: 1.4; }
+        .code-example { background-color: #222; padding: 5px; border-radius: 5px; font-family: monospace; color: #a2c638; display: block; margin-top: 5px; }
 
         /* --- TEST EKRANI --- */
         #quiz-screen { display: none; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; background-color: #1a1a1a; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 20; }
@@ -135,15 +143,12 @@
 
 <script>
     /* ================================================================
-       VERİTABANI
+       VERİTABANI (Local Storage v7)
        ================================================================ */
-    
-    // Varsayılan veriler
-    const defaultData = {
-        "YDS": {}, "H": {}, "B2": {}, "B1": {}, "C": {}
-    };
+    const defaultData = { "YDS": {}, "H": {}, "B2": {}, "B1": {}, "C": {} };
 
-    // --- C Seviyesi 1. Kısım ---
+    // --- ÖRNEK VERİLER (Sadece ilk açılışta yüklenir) ---
+    // C Seviye 1
     defaultData["C"][1] = [
         { "en": "Abandon", "tr": "Terk etmek, vazgeçmek" }, { "en": "Abolish", "tr": "Yürürlükten kaldırmak" },
         { "en": "Accomplish", "tr": "Başarmak, tamamlamak" }, { "en": "Accumulate", "tr": "Biriktirmek, çoğalmak" },
@@ -157,63 +162,14 @@
         { "en": "Confine", "tr": "Sınırlandırmak" }, { "en": "Cope with", "tr": "Başa çıkmak" }
     ];
 
-    // --- C Seviyesi 2. Kısım ---
-    defaultData["C"][2] = [
-        { "en": "Debate", "tr": "Tartışmak" }, { "en": "Decade", "tr": "On yıl" },
-        { "en": "Decay", "tr": "Çürümek" }, { "en": "Deceive", "tr": "Aldatmak" },
-        { "en": "Declare", "tr": "İlan etmek" }, { "en": "Decline", "tr": "Reddetmek / Azalmak" },
-        { "en": "Dedicate", "tr": "Adamak" }, { "en": "Deduce", "tr": "Sonuç çıkarmak" },
-        { "en": "Defect", "tr": "Kusur" }, { "en": "Defend", "tr": "Savunmak" },
-        { "en": "Defer", "tr": "Ertelemek" }, { "en": "Deficiency", "tr": "Yetersizlik" },
-        { "en": "Deficit", "tr": "Açık (bütçe)" }, { "en": "Define", "tr": "Tanımlamak" },
-        { "en": "Definite", "tr": "Kesin" }, { "en": "Delay", "tr": "Geciktirmek" },
-        { "en": "Delicate", "tr": "Hassas" }, { "en": "Demonstrate", "tr": "Göstermek" },
-        { "en": "Denial", "tr": "İnkar" }, { "en": "Denounce", "tr": "Kınamak" }
-    ];
-
-    // --- C Seviyesi 3. Kısım ---
-    defaultData["C"][3] = [
-        { "en": "Derive", "tr": "Türetmek" }, { "en": "Detect", "tr": "Tespit etmek" },
-        { "en": "Deter", "tr": "Caydırmak" }, { "en": "Deviate", "tr": "Sapmak" },
-        { "en": "Devise", "tr": "Tasarlamak, icat etmek" }, { "en": "Differentiate", "tr": "Ayırt etmek" },
-        { "en": "Diminish", "tr": "Azalmak" }, { "en": "Dispose", "tr": "Elden çıkarmak" },
-        { "en": "Distinct", "tr": "Belirgin, farklı" }, { "en": "Distort", "tr": "Çarpıtmak" },
-        { "en": "Diverse", "tr": "Çeşitli" }, { "en": "Dominate", "tr": "Hakim olmak" },
-        { "en": "Draft", "tr": "Taslak" }, { "en": "Dramatic", "tr": "Çarpıcı, önemli" },
-        { "en": "Duration", "tr": "Süre" }, { "en": "Dynamic", "tr": "Dinamik" },
-        { "en": "Eliminate", "tr": "Elemek, yok etmek" }, { "en": "Emerge", "tr": "Ortaya çıkmak" },
-        { "en": "Emphasize", "tr": "Vurgulamak" }, { "en": "Empirical", "tr": "Deneysel" }
-    ];
-
-    // --- C Seviyesi 4. Kısım ---
-    defaultData["C"][4] = [
-        { "en": "Enable", "tr": "Olanak sağlamak" }, { "en": "Encounter", "tr": "Karşılaşmak" },
-        { "en": "Enhance", "tr": "Geliştirmek" }, { "en": "Enormous", "tr": "Kocaman" },
-        { "en": "Ensure", "tr": "Garantiye almak" }, { "en": "Entail", "tr": "Gerektirmek" },
-        { "en": "Entity", "tr": "Varlık" }, { "en": "Equivalent", "tr": "Eşdeğer" },
-        { "en": "Era", "tr": "Çağ" }, { "en": "Erode", "tr": "Aşınmak" },
-        { "en": "Establish", "tr": "Kurmak" }, { "en": "Estate", "tr": "Mülk" },
-        { "en": "Estimate", "tr": "Tahmin etmek" }, { "en": "Ethical", "tr": "Etik" },
-        { "en": "Evaluate", "tr": "Değerlendirmek" }, { "en": "Eventual", "tr": "Nihai" },
-        { "en": "Evident", "tr": "Aşikar, belirgin" }, { "en": "Evolve", "tr": "Evrim geçirmek" },
-        { "en": "Exceed", "tr": "Aşmak" }, { "en": "Exclude", "tr": "Hariç tutmak" }
-    ];
-
     let vocabularyData = {};
-    
-    // Veri Anahtarı: Yeni verilerin yüklenmesi için v6 yapıldı
-    const STORAGE_KEY = 'myVocabApp_Data_v6';
+    const STORAGE_KEY = 'myVocabApp_Data_v7'; // Versiyonu v7 yaptık
 
     function loadData() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             vocabularyData = JSON.parse(stored);
-            // Eksik verileri tamamla
-            for(let i=1; i<=4; i++) {
-                if(!vocabularyData["C"][i] || vocabularyData["C"][i].length === 0) {
-                    vocabularyData["C"][i] = defaultData["C"][i];
-                }
-            }
+            if (!vocabularyData["C"][1] || vocabularyData["C"][1].length === 0) vocabularyData["C"][1] = defaultData["C"][1];
         } else {
             vocabularyData = JSON.parse(JSON.stringify(defaultData)); 
             saveData();
@@ -227,7 +183,6 @@
     loadData();
 
     // --- UYGULAMA MANTIĞI ---
-
     const TOTAL_LEVELS = 20;
     let activeCategory = 'C'; 
     let currentQuestions = [];
@@ -260,6 +215,7 @@
         }
     }
 
+    // --- 1. LİSTE GÖRÜNÜMÜ ---
     function renderLevelList(catName) {
         const container = document.getElementById('content-container');
         container.innerHTML = "";
@@ -286,38 +242,49 @@
         }
     }
 
+    // --- 2. KELİME EKLEME (GÜNCELLENDİ: TEKLİ VE TOPLU) ---
     function renderAddWordForm() {
         const container = document.getElementById('content-container');
+        
+        // Form HTML'i
         container.innerHTML = `
-            <div class="add-word-container">
+            <div class="add-word-container" style="border-color: #f1c40f;">
+                <div class="add-section-title">1. Hedef Seç</div>
                 <div class="form-group">
-                    <label class="form-label">İngilizce Kelime</label>
-                    <input type="text" id="new-en" class="form-input" placeholder="Örn: Resilience">
+                    <label class="form-label">Hangi Bölüme Eklensin?</label>
+                    <div style="display:flex; gap:10px;">
+                        <select id="target-cat" class="form-select">
+                            <option value="YDS">YDS</option>
+                            <option value="H">HABER-MAKALE</option>
+                            <option value="B2">B2</option>
+                            <option value="B1">B1</option>
+                            <option value="C" selected>C</option>
+                        </select>
+                        <select id="target-lvl" class="form-select">
+                            ${generateLevelOptions()}
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Türkçe Karşılığı</label>
-                    <input type="text" id="new-tr" class="form-input" placeholder="Örn: Direnç, esneklik">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Kategori Seç</label>
-                    <select id="new-cat" class="form-select">
-                        <option value="YDS">YDS</option>
-                        <option value="H">HABER-MAKALE</option>
-                        <option value="B2">B2</option>
-                        <option value="B1">B1</option>
-                        <option value="C" selected>C</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Seviye Seç (1-20)</label>
-                    <select id="new-lvl" class="form-select">
-                        ${generateLevelOptions()}
-                    </select>
-                </div>
-                <button class="save-btn" onclick="saveNewWord()">Kelimeyi Kaydet</button>
             </div>
-            <div style="text-align:center; margin-top:20px; color:#bdc3c7; font-size:14px;">
-                * Eklenen kelimeler hafızaya kaydedilir.
+
+            <div class="add-word-container">
+                <div class="add-section-title">2. Tekli Ekle</div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="single-en" class="form-input" placeholder="Word (Eng)">
+                    <input type="text" id="single-tr" class="form-input" placeholder="Anlam (Tr)">
+                </div>
+                <button class="save-btn" onclick="saveSingleWord()">Kaydet</button>
+            </div>
+
+            <div class="add-word-container">
+                <div class="add-section-title">3. Toplu Ekle (Liste veya JSON)</div>
+                <div class="helper-text">
+                    İki formatı da kabul eder:<br>
+                    1. <b>Kelime : Anlam</b> (Her satıra bir tane)<br>
+                    2. <b>JSON Formatı</b> (Koddan kopyaladığın gibi)
+                </div>
+                <textarea id="bulk-text" class="form-textarea" placeholder="Apple : Elma&#10;Run : Koşmak&#10;veya&#10;[{ 'en': 'Word', 'tr': 'Anlam' }]"></textarea>
+                <button class="save-btn secondary" onclick="saveBulkWords()">Toplu Yükle</button>
             </div>
         `;
     }
@@ -328,35 +295,99 @@
         return opts;
     }
 
-    function saveNewWord() {
-        const en = document.getElementById('new-en').value.trim();
-        const tr = document.getElementById('new-tr').value.trim();
-        const cat = document.getElementById('new-cat').value;
-        const lvl = parseInt(document.getElementById('new-lvl').value);
+    // Tekli Kaydetme Fonksiyonu
+    function saveSingleWord() {
+        const en = document.getElementById('single-en').value.trim();
+        const tr = document.getElementById('single-tr').value.trim();
+        const cat = document.getElementById('target-cat').value;
+        const lvl = parseInt(document.getElementById('target-lvl').value);
 
-        if(!en || !tr) {
-            alert("Lütfen tüm alanları doldurun.");
-            return;
-        }
+        if(!en || !tr) { alert("Lütfen kelime ve anlamı girin."); return; }
 
-        if (!vocabularyData[cat]) vocabularyData[cat] = {};
-        if (!vocabularyData[cat][lvl]) vocabularyData[cat][lvl] = [];
-
-        vocabularyData[cat][lvl].push({ en: en, tr: tr });
-        saveData();
-
-        alert(`"${en}" kelimesi ${cat} kategorisi ${lvl}. seviyeye başarıyla eklendi!`);
-        document.getElementById('new-en').value = "";
-        document.getElementById('new-tr').value = "";
+        addToDatabase(cat, lvl, en, tr);
+        
+        alert(`"${en}" eklendi!`);
+        document.getElementById('single-en').value = "";
+        document.getElementById('single-tr').value = "";
     }
 
+    // Toplu Kaydetme Fonksiyonu
+    function saveBulkWords() {
+        const text = document.getElementById('bulk-text').value.trim();
+        const cat = document.getElementById('target-cat').value;
+        const lvl = parseInt(document.getElementById('target-lvl').value);
+
+        if(!text) { alert("Lütfen yapıştırın."); return; }
+
+        let addedCount = 0;
+
+        try {
+            // Yöntem 1: JSON Kontrolü (Eğer [ ile başlıyorsa JSON varsay)
+            if (text.startsWith('[')) {
+                const jsonData = JSON.parse(text); // JSON parse etmeye çalış
+                if (Array.isArray(jsonData)) {
+                    jsonData.forEach(item => {
+                        if (item.en && item.tr) {
+                            addToDatabase(cat, lvl, item.en, item.tr);
+                            addedCount++;
+                        }
+                    });
+                }
+            } 
+            // Yöntem 2: Satır Satır (Word : Meaning)
+            else {
+                const lines = text.split('\n');
+                lines.forEach(line => {
+                    // Ayırıcılar: :, =, - olabilir
+                    let delimiter = ':';
+                    if (line.includes('=')) delimiter = '=';
+                    else if (line.includes('\t')) delimiter = '\t'; // Excel'den kopyalanırsa
+                    
+                    const parts = line.split(delimiter);
+                    if (parts.length >= 2) {
+                        const en = parts[0].trim();
+                        // Geri kalan her şeyi anlam olarak al (örn: "Run: Koşmak, Yönetmek")
+                        const tr = parts.slice(1).join(delimiter).trim(); 
+                        
+                        if (en && tr) {
+                            addToDatabase(cat, lvl, en, tr);
+                            addedCount++;
+                        }
+                    }
+                });
+            }
+
+            if (addedCount > 0) {
+                alert(`${addedCount} adet kelime başarıyla eklendi!`);
+                document.getElementById('bulk-text').value = ""; // Temizle
+            } else {
+                alert("Hiç kelime bulunamadı. Formatı kontrol edin.\nÖrn: Apple : Elma");
+            }
+
+        } catch (e) {
+            alert("Hata oluştu! JSON formatı bozuk olabilir veya liste düzgün değil.\n" + e.message);
+        }
+    }
+
+    // Ortak Veritabanı Ekleme Yardımcısı
+    function addToDatabase(cat, lvl, en, tr) {
+        if (!vocabularyData[cat]) vocabularyData[cat] = {};
+        if (!vocabularyData[cat][lvl]) vocabularyData[cat][lvl] = [];
+        
+        // Tekrarı önlemek isteyebiliriz ama şimdilik direkt ekliyoruz
+        vocabularyData[cat][lvl].push({ en: en, tr: tr });
+        saveData();
+    }
+
+
+    // --- 3. TEST (QUIZ) ---
     function startQuiz(levelIndex) {
         if(activeCategory === 'ADD') return;
 
         let levelWords = vocabularyData[activeCategory][levelIndex];
 
         if (!levelWords || levelWords.length === 0) {
-            alert("Bu seviyede henüz kelime yok. Lütfen 'Kelime Ekle' sekmesinden kelime ekleyin.");
+            alert("Bu seviyede henüz kelime yok. 'Kelime Ekle' sekmesinden ekleyin.");
             return;
         }
 
