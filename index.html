@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Uygulaması - Kalıcı Sürüm</title>
+    <title>Kelime Uygulaması - Otomatik Kod Üretici</title>
     <style>
         /* --- GENEL AYARLAR --- */
         body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #4a6a7a; color: white; display: flex; justify-content: center; user-select: none; }
@@ -38,7 +38,7 @@
         .level-info { font-size: 18px; font-weight: bold; }
         .level-progress { color: #ecf0f1; font-size: 14px; font-weight: normal; opacity: 0.8; }
 
-        /* --- KELİME EKLEME FORMU --- */
+        /* --- FORM ELEMANLARI --- */
         .add-section-title { font-size: 18px; font-weight: bold; color: #f1c40f; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; }
         .add-word-container { background-color: #3e5c6a; padding: 20px; border-radius: 15px; border: 2px dashed #bdc3c7; margin-bottom: 20px; }
         
@@ -51,12 +51,18 @@
         .save-btn { width: 100%; padding: 15px; background-color: #f1c40f; color: #1a1a1a; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.1s; margin-top: 10px; }
         .save-btn:active { transform: scale(0.98); }
         .save-btn.secondary { background-color: #3498db; color: white; }
-        .save-btn.danger { background-color: #e74c3c; color: white; }
+        .save-btn.code-btn { background-color: #e74c3c; color: white; margin-top: 5px; }
 
-        /* Pop-up Modal (Kod Çıktısı İçin) */
-        #code-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; }
-        .modal-content { background: #2c3e50; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; border: 2px solid #f1c40f; }
-        .modal-text { width: 100%; height: 200px; background: #1a1a1a; color: #a2c638; font-family: monospace; border: none; padding: 10px; box-sizing: border-box; margin-bottom: 10px; }
+        .helper-text { font-size: 12px; color: #bdc3c7; margin-top: 5px; line-height: 1.4; }
+        
+        /* Kod Çıktı Alanı Stili */
+        #live-code-output { 
+            background-color: #1a1a1a; color: #a2c638; 
+            font-family: 'Courier New', Courier, monospace; 
+            font-size: 12px; height: 150px; 
+            white-space: pre; overflow-x: auto; 
+            border: 1px solid #a2c638;
+        }
 
         /* --- TEST EKRANI --- */
         #quiz-screen { display: none; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; background-color: #1a1a1a; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 20; }
@@ -141,18 +147,6 @@
         </div>
     </div>
 
-    <div id="code-modal">
-        <div class="modal-content">
-            <h3 style="color:#f1c40f; margin-top:0;">Veritabanı Kodu</h3>
-            <p style="font-size:13px; color:#bdc3c7;">
-                Sonradan eklediğin kelimelerin de %100 kalıcı olmasını istiyorsan, aşağıdaki kodu kopyala ve HTML dosyasındaki <b>defaultData</b> kısmı ile değiştir.
-            </p>
-            <textarea id="code-output" class="modal-text" readonly></textarea>
-            <button class="save-btn" onclick="copyToClipboard()">Kopyala</button>
-            <button class="save-btn secondary" onclick="document.getElementById('code-modal').style.display='none'">Kapat</button>
-        </div>
-    </div>
-
 </div>
 
 <script>
@@ -160,8 +154,10 @@
        VERİTABANI (HARDCODED + LOCAL STORAGE)
        ================================================================ */
     
-    // SABİT VERİLER (Kodun içine gömülü, asla silinmez)
-    // Eğer tarayıcı önbelleğini temizlersen buradaki veriler geri yüklenir.
+    // Tarayıcı güvenlik nedeniyle dosyanın kendisini değiştiremez.
+    // Ancak sen eklediğin kelimeleri aşağıdaki "defaultData" değişkenine yapıştırırsan
+    // kelimeler sonsuza kadar kalıcı olur.
+    
     const defaultData = { "YDS": {}, "H": {}, "B2": {}, "B1": {}, "C": {} };
 
     // --- C Seviye 1 ---
@@ -221,19 +217,16 @@
     ];
 
     let vocabularyData = {};
-    const STORAGE_KEY = 'myVocabApp_Data_v8'; // Güvenlik için versiyon yükselttik
+    const STORAGE_KEY = 'myVocabApp_Data_v9'; // Versiyon güncellemesi
 
     function loadData() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             vocabularyData = JSON.parse(stored);
-            // Kritik verileri (Level 1-4) her zaman varsayılandan geri yükle (Silinmeyi önlemek için)
+            // Sabit verileri her zaman geri yükle
             for (let i = 1; i <= 4; i++) {
                  if (!vocabularyData["C"][i] || vocabularyData["C"][i].length === 0) {
                      vocabularyData["C"][i] = defaultData["C"][i];
-                 } else {
-                     // Eğer veri varsa ama varsayılandan eksikse birleştirme mantığı eklenebilir.
-                     // Şimdilik sadece boşsa dolduruyoruz.
                  }
             }
         } else {
@@ -244,6 +237,8 @@
 
     function saveData() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabularyData));
+        // Kaydettikten sonra otomatik kod çıktısını güncelle
+        if(document.getElementById('live-code-output')) updateLiveCode();
     }
 
     loadData();
@@ -347,22 +342,41 @@
                 <button class="save-btn secondary" onclick="saveBulkWords()">Toplu Yükle</button>
             </div>
 
-            <div class="add-word-container" style="border-color: #a2c638;">
-                <div class="add-section-title">4. Veritabanını Koda Çevir (Yedekle)</div>
-                <div class="helper-text">
-                    Tarayıcı geçmişini temizlersen eklediğin kelimeler gidebilir. 
-                    Kelimeleri ölümsüz yapmak için aşağıdaki butona bas, kodu kopyala ve HTML dosyasındaki 
-                    <b>const defaultData = ...</b> kısmına yapıştır.
-                </div>
-                <button class="save-btn" style="background-color:#a2c638; color:#1a1a1a;" onclick="exportToCode()">Verileri Koda Dönüştür</button>
+            <div class="add-word-container" style="border-color: #e74c3c;">
+                <div class="add-section-title">4. Otomatik Kod Çıktısı (Ölümsüz Yap)</div>
+                <p class="helper-text">
+                    Eklediğin kelimeler aşağıya otomatik yansır. İşin bitince bu kodu kopyala ve HTML dosyasındaki 
+                    <b>const defaultData = ...</b> kısmı ile değiştir. Böylece kelimeler asla silinmez.
+                </p>
+                <textarea id="live-code-output" class="form-textarea" readonly></textarea>
+                <button class="save-btn code-btn" onclick="copyCode()">Kopyala</button>
             </div>
         `;
+        
+        // Form açıldığında kodu hemen doldur
+        updateLiveCode();
     }
 
     function generateLevelOptions() {
         let opts = "";
         for(let i=1; i<=20; i++) opts += `<option value="${i}">${i}. Seviye</option>`;
         return opts;
+    }
+
+    // --- ANLIK KOD GÜNCELLEME FONKSİYONU ---
+    function updateLiveCode() {
+        const textArea = document.getElementById('live-code-output');
+        if (textArea) {
+            const code = "const defaultData = " + JSON.stringify(vocabularyData, null, 4) + ";";
+            textArea.value = code;
+        }
+    }
+
+    function copyCode() {
+        const copyText = document.getElementById("live-code-output");
+        copyText.select();
+        document.execCommand("copy");
+        alert("Kod kopyalandı! Şimdi HTML dosyanı aç ve 'const defaultData' kısmını bununla değiştir.");
     }
 
     function saveSingleWord() {
@@ -387,19 +401,36 @@
         if(!text) { alert("Lütfen liste yapıştırın."); return; }
 
         let addedCount = 0;
-        const lines = text.split('\n');
-        lines.forEach(line => {
-            let delimiter = line.includes(':') ? ':' : (line.includes('=') ? '=' : '\t');
-            const parts = line.split(delimiter);
-            if (parts.length >= 2) {
-                const en = parts[0].trim();
-                const tr = parts.slice(1).join(delimiter).trim();
-                if (en && tr) {
-                    addToDatabase(cat, lvl, en, tr);
-                    addedCount++;
+        
+        // JSON kontrolü
+        if (text.trim().startsWith('[')) {
+            try {
+                const jsonData = JSON.parse(text);
+                if (Array.isArray(jsonData)) {
+                    jsonData.forEach(item => {
+                        if (item.en && item.tr) {
+                            addToDatabase(cat, lvl, item.en, item.tr);
+                            addedCount++;
+                        }
+                    });
                 }
-            }
-        });
+            } catch(e) { console.log(e); }
+        } else {
+            // Normal metin kontrolü
+            const lines = text.split('\n');
+            lines.forEach(line => {
+                let delimiter = line.includes(':') ? ':' : (line.includes('=') ? '=' : '\t');
+                const parts = line.split(delimiter);
+                if (parts.length >= 2) {
+                    const en = parts[0].trim();
+                    const tr = parts.slice(1).join(delimiter).trim();
+                    if (en && tr) {
+                        addToDatabase(cat, lvl, en, tr);
+                        addedCount++;
+                    }
+                }
+            });
+        }
 
         if (addedCount > 0) {
             alert(`${addedCount} kelime eklendi.`);
@@ -413,21 +444,7 @@
         if (!vocabularyData[cat]) vocabularyData[cat] = {};
         if (!vocabularyData[cat][lvl]) vocabularyData[cat][lvl] = [];
         vocabularyData[cat][lvl].push({ en: en, tr: tr });
-        saveData();
-    }
-
-    // --- KODU DIŞARI AKTAR (EXPORT) ---
-    function exportToCode() {
-        const code = "const defaultData = " + JSON.stringify(vocabularyData, null, 4) + ";";
-        document.getElementById('code-output').value = code;
-        document.getElementById('code-modal').style.display = 'flex';
-    }
-
-    function copyToClipboard() {
-        const copyText = document.getElementById("code-output");
-        copyText.select();
-        document.execCommand("copy");
-        alert("Kod kopyalandı! Şimdi HTML dosyasını açıp 'const defaultData = ...' kısmını bununla değiştir.");
+        saveData(); // Bu fonksiyon içinde updateLiveCode() çağrılır
     }
 
     // --- TEST (QUIZ) ---
