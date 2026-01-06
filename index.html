@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelime Uygulaması Arayüzü</title>
+    <style>
+        /* Genel Tasarım */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #4a6a7a; /* Arka plan rengi */
+            color: white;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: #4a6a7a;
+            min-height: 100vh;
+        }
+
+        /* Üst Başlık Kısmı */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .settings-icon { font-size: 24px; cursor: pointer; }
+        .app-title { font-size: 22px; font-weight: bold; }
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            background-color: #f3d290;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+        }
+
+        /* Sekme Menüsü (YDS, C, B2...) */
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            color: #bdc3c7;
+            text-decoration: none;
+            font-weight: bold;
+            padding-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            color: #f1c40f;
+            border-bottom: 3px solid #f1c40f;
+        }
+
+        /* Seviye Kartları Listesi */
+        .level-list {
+            padding: 20px;
+        }
+
+        .level-card {
+            background-color: #3e5c6a;
+            border: 2px solid #d4a35a; /* Altın sarısı çerçeve */
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .level-card:hover {
+            transform: scale(1.02);
+        }
+
+        .level-icon {
+            font-size: 30px;
+            margin-right: 20px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .level-info {
+            flex-grow: 1;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .level-progress {
+            color: #bdc3c7;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="settings-icon">⚙️</div>
+        <div class="app-title">C - 1312 Kelime</div>
+        <div class="profile-pic">👨🏻‍💼</div>
+    </header>
+
+    <div class="tabs">
+        <div class="tab">YDS</div>
+        <div class="tab active">C</div>
+        <div class="tab">B2</div>
+        <div class="tab">B1</div>
+        <div class="tab">A2</div>
+        <div class="tab">A1</div>
+    </div>
+
+    <div class="level-list">
+        
+        <div class="level-card">
+            <div class="level-icon">🛡️</div>
+            <div class="level-info">1. Seviye</div>
+            <div class="level-progress">(20/20)</div>
+        </div>
+
+        <div class="level-card">
+            <div class="level-icon">✍️</div>
+            <div class="level-info">2. Seviye</div>
+            <div class="level-progress">(0/20)</div>
+        </div>
+
+        <div class="level-card">
+            <div class="level-icon">🔍</div>
+            <div class="level-info">3. Seviye</div>
+            <div class="level-progress">(0/20)</div>
+        </div>
+
+        <div class="level-card">
+            <div class="level-icon">💭</div>
+            <div class="level-info">4. Seviye</div>
+            <div class="level-progress">(0/20)</div>
+        </div>
+
+        <div class="level-card">
+            <div class="level-icon">📚</div>
+            <div class="level-info">5. Seviye</div>
+            <div class="level-progress">(0/20)</div>
+        </div>
+
+        <div class="level-card">
+            <div class="level-icon">👑</div>
+            <div class="level-info">6. Seviye</div>
+            <div class="level-progress">(0/20)</div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
