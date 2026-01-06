@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Uygulaması</title>
+    <title>Kelime Uygulaması - Manuel Yönetim</title>
     <style>
         /* --- GENEL AYARLAR --- */
         body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #4a6a7a; color: white; display: flex; justify-content: center; user-select: none; }
         .app-container { width: 100%; max-width: 500px; min-height: 100vh; position: relative; background-color: #4a6a7a; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* --- ANASAYFA STİLLERİ --- */
+        /* --- ANASAYFA --- */
         #home-screen { display: flex; flex-direction: column; height: 100%; }
         header.home-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #354f5c; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .settings-icon { font-size: 24px; cursor: pointer; color: #f1c40f; }
         .app-title { font-size: 20px; font-weight: bold; }
         .profile-pic { width: 40px; height: 40px; background-color: #f3d290; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; overflow: hidden; }
-        .profile-pic img { width: 100%; height: 100%; object-fit: cover; } /* Avatar için */
         
         /* Sekmeler */
-        .tabs { display: flex; justify-content: space-around; padding: 15px 0; background-color: #354f5c; position: sticky; top: 70px; z-index: 10; }
-        .tab { color: #bdc3c7; font-weight: bold; padding: 5px 10px; cursor: pointer; font-size: 15px; position: relative; }
+        .tabs { display: flex; justify-content: space-around; padding: 15px 0; background-color: #354f5c; position: sticky; top: 70px; z-index: 10; overflow-x: auto; }
+        .tab { color: #bdc3c7; font-weight: bold; padding: 5px 10px; cursor: pointer; font-size: 15px; position: relative; white-space: nowrap; }
         .tab.active { color: #f1c40f; }
         .tab.active::after { content: ''; position: absolute; bottom: -17px; left: 0; width: 100%; height: 3px; background-color: #f1c40f; }
 
@@ -34,88 +33,60 @@
             transition: transform 0.1s;
         }
         .level-card:active { transform: scale(0.98); }
-        
         .card-left { display: flex; align-items: center; }
         .level-icon { font-size: 28px; margin-right: 15px; }
         .level-info { font-size: 18px; font-weight: bold; }
         .level-progress { color: #ecf0f1; font-size: 14px; font-weight: normal; opacity: 0.8; }
 
-        /* --- TEST EKRANI STİLLERİ (Görseldeki gibi Dark Mode) --- */
+        /* --- TEST EKRANI --- */
         #quiz-screen { 
             display: none; flex-direction: column; height: 100vh; 
             padding: 20px; box-sizing: border-box; 
-            background-color: #1a1a1a; /* Koyu arka plan */
+            background-color: #1a1a1a; 
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 20; 
         }
 
         .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; height: 50px; }
-        .close-btn { font-size: 28px; cursor: pointer; color: #3498db; } /* Mavi X */
+        .close-btn { font-size: 28px; cursor: pointer; color: #3498db; }
         .quiz-title { font-size: 16px; font-weight: bold; color: #fff; }
         .power-icon { color: #3498db; font-size: 18px; font-weight: bold; }
 
-        /* İlerleme Çubuğu */
         .progress-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
         .progress-track { flex-grow: 1; height: 6px; background-color: #333; border-radius: 3px; overflow: hidden; margin-right: 10px; }
         #progress-fill { width: 0%; height: 100%; background-color: #3498db; transition: width 0.3s; }
         .progress-text { color: #3498db; font-size: 14px; font-weight: bold; }
 
-        /* Soru Alanı */
         .quiz-content { flex-grow: 1; text-align: center; display: flex; flex-direction: column; align-items: center; }
         .audio-icon { font-size: 32px; color: #f1c40f; margin-bottom: 20px; cursor: pointer; }
         .word-to-solve { font-size: 36px; font-weight: 800; margin-bottom: 50px; color: #fff; }
 
-        /* Seçenekler */
         .options { width: 100%; display: flex; flex-direction: column; gap: 15px; }
         .option-btn { 
-            background-color: #262626; /* Koyu buton */
-            border: none; color: #bdc3c7; 
-            padding: 20px; border-radius: 30px; 
-            font-size: 16px; font-weight: 500; 
+            background-color: #262626; border: none; color: #bdc3c7; 
+            padding: 20px; border-radius: 30px; font-size: 16px; font-weight: 500; 
             cursor: pointer; transition: all 0.2s; 
         }
         .option-btn:hover { background-color: #333; }
-        
-        /* Doğru/Yanlış Durumları */
-        .option-btn.correct { background-color: #a2c638; color: white; font-weight: bold; } /* Görseldeki yeşil */
+        .option-btn.correct { background-color: #a2c638; color: white; font-weight: bold; }
         .option-btn.wrong { background-color: #e74c3c; color: white; font-weight: bold; }
 
-        /* --- SONUÇ VE BAŞARI EKRANI --- */
-        
-        /* Büyük Yeşil Tik (Overlay) */
+        /* Başarı Overlay */
         #success-overlay {
-            display: none; position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 140px; height: 140px;
-            background-color: #a2c638; /* Yeşil daire */
-            border-radius: 50%;
-            justify-content: center; align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 50;
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 140px; height: 140px; background-color: #a2c638; border-radius: 50%;
+            justify-content: center; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 50;
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        
-        /* Tik işareti çizimi (CSS ile) */
-        .checkmark {
-            width: 40px; height: 70px;
-            border-bottom: 10px solid white;
-            border-right: 10px solid white;
-            transform: rotate(45deg);
-            margin-top: -15px;
-        }
+        .checkmark { width: 40px; height: 70px; border-bottom: 10px solid white; border-right: 10px solid white; transform: rotate(45deg); margin-top: -15px; }
+        @keyframes popIn { 0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 
-        @keyframes popIn {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-
-        /* Seviye Sonu Sonuç Kartı */
+        /* Sonuç Ekranı */
         #result-screen { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(26, 26, 26, 0.95); z-index: 60; backdrop-filter: blur(5px); }
         .result-card { background-color: #3e5c6a; width: 80%; padding: 30px; border-radius: 20px; text-align: center; border: 2px solid #d4a35a; }
         .score-circle { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#f1c40f 0% 0%, #333 0% 100%); margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; position: relative; }
         .score-circle::before { content: ""; position: absolute; width: 80px; height: 80px; background-color: #3e5c6a; border-radius: 50%; }
         .score-text { position: relative; z-index: 2; }
         .home-btn { background-color: #f1c40f; color: #1a1a1a; border: none; padding: 15px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-
     </style>
 </head>
 <body>
@@ -125,17 +96,17 @@
     <div id="home-screen">
         <header class="home-header">
             <div class="settings-icon">⚙️</div>
-            <div class="app-title" id="app-header-title">C - 1312 Kelime</div>
+            <div class="app-title" id="app-header-title">C - Seviyesi</div>
             <div class="profile-pic">👨🏻‍💼</div>
         </header>
 
         <div class="tabs">
-            <div class="tab">YDS</div>
-            <div class="tab active">C</div>
-            <div class="tab">B2</div>
-            <div class="tab">B1</div>
-            <div class="tab">A2</div>
-            <div class="tab">A1</div>
+            <div class="tab" onclick="switchTab('YDS', this)">YDS</div>
+            <div class="tab active" onclick="switchTab('C', this)">C</div>
+            <div class="tab" onclick="switchTab('B2', this)">B2</div>
+            <div class="tab" onclick="switchTab('B1', this)">B1</div>
+            <div class="tab" onclick="switchTab('A2', this)">A2</div>
+            <div class="tab" onclick="switchTab('A1', this)">A1</div>
         </div>
 
         <div class="level-list" id="level-container">
@@ -145,7 +116,7 @@
     <div id="quiz-screen">
         <header class="quiz-header">
             <div class="close-btn" onclick="quitQuiz()">✕</div>
-            <div class="quiz-title">En Çok Kullanılan Fiiller</div>
+            <div class="quiz-title">Kelime Testi</div>
             <div class="power-icon">⚡+</div>
         </header>
 
@@ -160,9 +131,7 @@
             <div class="options" id="options-container"></div>
         </div>
         
-        <div id="success-overlay">
-            <div class="checkmark"></div>
-        </div>
+        <div id="success-overlay"><div class="checkmark"></div></div>
     </div>
 
     <div id="result-screen">
@@ -171,7 +140,7 @@
             <div class="score-circle" id="score-circle">
                 <span class="score-text" id="final-score">0/20</span>
             </div>
-            <div style="color: #bdc3c7;">Başarı Durumu</div>
+            <div style="color: #bdc3c7;">Tebrikler!</div>
             <button class="home-btn" onclick="closeResultScreen()">Ana Sayfaya Dön</button>
         </div>
     </div>
@@ -179,73 +148,112 @@
 </div>
 
 <script>
-    // --- 1. VERİ TABANI OLUŞTURMA ---
+    /* ================================================================
+       KELİME VERİTABANI (MANUEL DÜZENLEME ALANI)
+       ================================================================
+       Yapı: vocabularyData['KategoriAdı'][SeviyeNumarası] = [Kelimeler];
+    */
     
-    // Kullanıcının istediği özel 6. Seviye Kelimeleri (JSON Formatında)
-    const level6Words = [
+    // Veritabanı yapısını oluşturuyoruz
+    const vocabularyData = {
+        "YDS": {},
+        "C": {},
+        "B2": {},
+        "B1": {},
+        "A2": {},
+        "A1": {}
+    };
+
+    // ----------------------------------------------------------------
+    // 1. C SEKMESİ
+    // ----------------------------------------------------------------
+    
+    // C - SEVİYE 6 (Sizin verdiğiniz özel kelimeler - DOKUNMA)
+    vocabularyData["C"][6] = [
         { en: "Abandon", tr: "Terk etmek, vazgeçmek" },
         { en: "Abolish", tr: "Yürürlükten kaldırmak" },
         { en: "Accomplish", tr: "Başarmak, tamamlamak" },
         { en: "Accumulate", tr: "Biriktirmek, çoğalmak" },
         { en: "Acquire", tr: "Edinmek, kazanmak" },
-        { en: "Adopt", tr: "Evlat edinmek / (Bir yöntemi) Benimsemek" },
+        { en: "Adopt", tr: "Evlat edinmek / Benimsemek" },
         { en: "Advocate", tr: "Savunmak, desteklemek" },
         { en: "Alleviate", tr: "Hafifletmek, yatıştırmak" },
         { en: "Alter", tr: "Değiştirmek" },
         { en: "Ambiguity", tr: "Belirsizlik" },
         { en: "Assess", tr: "Değerlendirmek" },
-        { en: "Benefit", tr: "Faydalanmak, yarar sağlamak" },
+        { en: "Benefit", tr: "Faydalanmak" },
         { en: "Boost", tr: "Artırmak, yükseltmek" },
-        { en: "Coincide", tr: "Rastlamak, aynı zamana denk gelmek" },
+        { en: "Coincide", tr: "Rastlamak" },
         { en: "Compensate (for)", tr: "Telafi etmek" },
-        { en: "Comprise", tr: "-den oluşmak, kapsamak" },
+        { en: "Comprise", tr: "-den oluşmak" },
         { en: "Conceal", tr: "Gizlemek, saklamak" },
-        { en: "Conduct", tr: "Yürütmek (deney, anket vb.)" },
-        { en: "Confine", tr: "Sınırlandırmak, hapsetmek" },
-        { en: "Cope with", tr: "Başa çıkmak, üstesinden gelmek" }
+        { en: "Conduct", tr: "Yürütmek" },
+        { en: "Confine", tr: "Sınırlandırmak" },
+        { en: "Cope with", tr: "Başa çıkmak" }
     ];
 
-    // Diğer seviyeler için örnek/doldurma kelimeler (Simüle edilmiş veri tabanı)
-    let fullVocabularyDB = [];
+    // C - SEVİYE 1 (Örnek Manuel Ekleme Alanı)
+    vocabularyData["C"][1] = [
+        // Buraya 20 kelime ekleyebilirsin: { en: "Word", tr: "Anlam" },
+    ];
 
-    // Veritabanını Doldurma Fonksiyonu
-    function initDatabase() {
-        // Önce 0'dan 400'e kadar jenerik kelimelerle dolduralım
-        for (let i = 0; i < 400; i++) {
-            fullVocabularyDB.push({
-                en: `Word ${i + 1}`,
-                tr: `Kelime ${i + 1} Anlamı`
-            });
-        }
+    // ----------------------------------------------------------------
+    // 2. B2 SEKMESİ (Örnek)
+    // ----------------------------------------------------------------
+    vocabularyData["B2"][1] = [
+        // Buraya B2 Seviye 1 kelimelerini ekleyebilirsin
+    ];
 
-        // ŞİMDİ ÖNEMLİ KISIM: 6. Seviye (Index 100 ile 119 arası) kelimelerini özel listeyle değiştiriyoruz.
-        // Seviye 6 = (6-1) * 20 = 100. indeksten başlar.
-        const level6StartIndex = 100;
-        
-        for (let i = 0; i < level6Words.length; i++) {
-            if (fullVocabularyDB[level6StartIndex + i]) {
-                fullVocabularyDB[level6StartIndex + i] = level6Words[i];
+
+    /* ================================================================
+       OTOMATİK DOLDURMA (BOŞ KALAN YERLER İÇİN)
+       Siz manuel ekleyene kadar uygulama hata vermesin diye boş kalan
+       seviyeleri geçici kelimelerle dolduruyoruz.
+       ================================================================
+    */
+    const categories = ["YDS", "C", "B2", "B1", "A2", "A1"];
+    
+    categories.forEach(cat => {
+        for (let i = 1; i <= 20; i++) {
+            // Eğer o seviye için manuel veri girilmemişse, otomatik doldur
+            if (!vocabularyData[cat][i] || vocabularyData[cat][i].length === 0) {
+                let tempWords = [];
+                for (let k = 1; k <= 20; k++) {
+                    tempWords.push({
+                        en: `${cat} L${i} - Word ${k}`, // Örn: C L5 - Word 1
+                        tr: `Anlam ${k}`
+                    });
+                }
+                vocabularyData[cat][i] = tempWords;
             }
         }
-    }
+    });
 
-    initDatabase(); // Veritabanını başlat
-
-    // --- 2. UYGULAMA MANTIĞI ---
+    // --- UYGULAMA MANTIĞI ---
 
     const TOTAL_LEVELS = 20;
-    const QUESTIONS_PER_LEVEL = 20;
-    
+    let activeCategory = 'C';
     let currentQuestions = [];
     let currentStep = 0;
     let correctCount = 0;
 
-    // Sayfa Yüklendiğinde Listeyi Çiz
+    // Başlangıçta C sekmesini aç
     window.onload = function() {
-        renderLevelList();
+        renderLevelList('C');
     };
 
-    function renderLevelList() {
+    function switchTab(catName, tabElement) {
+        // Sekme görünümlerini güncelle
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tabElement.classList.add('active');
+        
+        // Aktif kategoriyi değiştir ve listeyi yenile
+        activeCategory = catName;
+        document.getElementById('app-header-title').innerText = `${catName} - Seviyesi`;
+        renderLevelList(catName);
+    }
+
+    function renderLevelList(catName) {
         const container = document.getElementById('level-container');
         container.innerHTML = "";
         const icons = ["🛡️", "✍️", "🔍", "💭", "📚", "👑", "🚀", "💎", "🧩", "🔥"];
@@ -257,7 +265,7 @@
                         <div class="level-icon">${icons[(i-1)%icons.length]}</div>
                         <div class="level-info">${i}. Seviye</div>
                     </div>
-                    <div class="level-progress">(0/20)</div>
+                    <div class="level-progress">(Başla)</div>
                 </div>
             `;
             container.innerHTML += html;
@@ -265,41 +273,50 @@
     }
 
     function startQuiz(levelIndex) {
-        // İlgili seviyenin sorularını çek
-        generateLevelQuestions(levelIndex);
+        // İlgili kategori ve seviyedeki kelimeleri al
+        let levelWords = vocabularyData[activeCategory][levelIndex];
+
+        // Eğer kelime yoksa veya eksikse hata vermesin
+        if (!levelWords || levelWords.length === 0) {
+            alert("Bu seviye için henüz kelime eklenmemiş.");
+            return;
+        }
+
+        // Soruları oluştur
+        generateQuestions(levelWords);
         
-        // Ekranları değiştir
+        // Ekranı aç
         document.getElementById('home-screen').style.display = 'none';
         document.getElementById('quiz-screen').style.display = 'flex';
+        document.querySelector('.quiz-title').innerText = `${activeCategory} - ${levelIndex}. Seviye`;
         
-        // Değişkenleri sıfırla
         currentStep = 0;
         correctCount = 0;
         loadQuestionUI();
     }
 
-    function generateLevelQuestions(level) {
-        // Seviyeye göre veritabanından dilim (slice) al
-        // Örn: Level 6 -> 100 ile 120 arasını alacak (Bizim özel kelimeler)
-        const startIndex = (level - 1) * QUESTIONS_PER_LEVEL;
-        const endIndex = startIndex + QUESTIONS_PER_LEVEL;
-        
-        const levelWords = fullVocabularyDB.slice(startIndex, endIndex);
-        
-        // Soruları ve şıkları oluştur
-        currentQuestions = levelWords.map(word => {
+    function generateQuestions(words) {
+        currentQuestions = words.map(word => {
             let correct = word.tr;
             
-            // Yanlış şıkları havuzdan rastgele seç
+            // Yanlış cevapları aynı listedeki diğer kelimelerden seç
             let distractors = [];
-            while(distractors.length < 3) {
-                let randomWord = fullVocabularyDB[Math.floor(Math.random() * fullVocabularyDB.length)];
+            let safetyLoop = 0;
+            
+            while(distractors.length < 3 && safetyLoop < 50) {
+                let randomWord = words[Math.floor(Math.random() * words.length)];
                 if(randomWord.tr !== correct && !distractors.includes(randomWord.tr)) {
                     distractors.push(randomWord.tr);
                 }
+                safetyLoop++;
             }
             
-            // Şıkları karıştır
+            // Eğer listede yeterli kelime yoksa (örn: test aşamasında sadece 2 kelime varsa)
+            // Sistem çökmemesi için sahte yanlış cevap ekle
+            while(distractors.length < 3) {
+                distractors.push("Diğer Seçenek " + (distractors.length+1));
+            }
+
             let options = [...distractors, correct].sort(() => 0.5 - Math.random());
             
             return {
@@ -311,7 +328,6 @@
     }
 
     function loadQuestionUI() {
-        // Test bitti mi kontrolü
         if (currentStep >= currentQuestions.length) {
             showResult();
             return;
@@ -319,15 +335,13 @@
 
         const data = currentQuestions[currentStep];
         
-        // UI Güncelleme
         document.getElementById('target-word').innerText = data.en;
-        document.getElementById('progress-text').innerText = `${currentStep + 1}/${QUESTIONS_PER_LEVEL}`;
-        document.getElementById('progress-fill').style.width = `${((currentStep + 1) / QUESTIONS_PER_LEVEL) * 100}%`;
+        document.getElementById('progress-text').innerText = `${currentStep + 1}/${currentQuestions.length}`;
+        document.getElementById('progress-fill').style.width = `${((currentStep + 1) / currentQuestions.length) * 100}%`;
 
         const container = document.getElementById('options-container');
         container.innerHTML = '';
 
-        // Şık butonlarını oluştur
         data.options.forEach(opt => {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
@@ -338,54 +352,45 @@
     }
 
     function handleAnswer(selected, correct, btn) {
-        // Butonları kilitle
         const allBtns = document.querySelectorAll('.option-btn');
         allBtns.forEach(b => b.disabled = true);
 
         if (selected === correct) {
-            // DOĞRU CEVAP
             btn.classList.add('correct');
             correctCount++;
             
-            // Yeşil Onay İkonunu Göster (Pop-up)
             const overlay = document.getElementById('success-overlay');
             overlay.style.display = 'flex';
             
             setTimeout(() => {
-                overlay.style.display = 'none'; // İkonu gizle
+                overlay.style.display = 'none';
                 currentStep++;
-                loadQuestionUI(); // Sonraki soruya geç
-            }, 1000); // 1 saniye bekle
-
+                loadQuestionUI();
+            }, 1000);
         } else {
-            // YANLIŞ CEVAP
             btn.classList.add('wrong');
-            
-            // Doğru olanı göster
             allBtns.forEach(b => {
                 if (b.innerText === correct) b.classList.add('correct');
             });
-
             setTimeout(() => {
                 currentStep++;
                 loadQuestionUI();
-            }, 1500); // Yanlışta biraz daha uzun bekle ki doğruyu görsün
+            }, 1500);
         }
     }
 
     function quitQuiz() {
-        if(confirm("Testten çıkmak istiyor musunuz?")) {
-            closeResultScreen();
-        }
+        if(confirm("Testten çıkmak istiyor musun?")) closeResultScreen();
     }
 
     function showResult() {
         document.getElementById('quiz-screen').style.display = 'none';
         document.getElementById('result-screen').style.display = 'flex';
-
-        document.getElementById('final-score').innerText = `${correctCount}/${QUESTIONS_PER_LEVEL}`;
         
-        let percentage = (correctCount / QUESTIONS_PER_LEVEL) * 100;
+        let total = currentQuestions.length;
+        document.getElementById('final-score').innerText = `${correctCount}/${total}`;
+        
+        let percentage = (correctCount / total) * 100;
         let color = percentage >= 50 ? '#a2c638' : '#e74c3c';
         document.querySelector('.score-circle').style.background = `conic-gradient(${color} 0% ${percentage}%, #333 ${percentage}% 100%)`;
     }
